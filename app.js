@@ -11,16 +11,37 @@ const database = mysql.createConnection({
 
 //telegraf setup
 const telegraf = new Telegraf(process.env.YKSTEST_TOKEN)
-telegraf.start((ctx) => ctx.reply('Hello'))
-telegraf.command('driver', (ctx) => registerUserAsDriver(ctx))
+telegraf.start((ctx) => start(ctx))
+telegraf.command('driver', (ctx) => registerAsDriver(ctx))
 telegraf.launch()
 
 //telegraf stop
 process.once('SIGINT', () => stopApp('SIGINT'))
 process.once('SIGTERM', () => stopApp('SIGTERM'))
 
-function registerUserAsDriver(ctx) {
-	
+function start(ctx) {
+	ctx.reply('Здравствуйте!\nПубликации заказа /request\nПросмотреть список заказов /driver')
+}
+
+async function registerAsDriver(ctx) {
+	const [rows] = await carsOfUser(ctx.update.message.from.id)
+
+	if (Array.isArray(rows) && rows.length == 0) {
+		ctx.reply('Регистрация авто:')
+	}
+
+	//Авто
+	///Марка
+	///Модель
+	///Цвет
+	//Госномер
+}
+
+//Promise of list of cars of user
+function carsOfUser(userId) {
+	return database.promise().query(
+		'SELECT * FROM `cars` WHERE `user_id` = ?',
+		[userId])
 }
 
 function stopApp(reason) {
