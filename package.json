@@ -9,6 +9,7 @@
   "author": "Kirill Prokopev <ibotlold@gmail.com>",
   "license": "PRIVATE",
   "dependencies": {
-    "telegraf-session-mysql": "^5.3.0"
+    "mysql2": "^2.3.3",
+    "telegraf": "^4.7.0"
   }
 }
