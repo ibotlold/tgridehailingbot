@@ -180,8 +180,8 @@ driverQueueScene.command('start',(ctx) => {
 })
 driverQueueScene.on('callback_query', async (ctx) => {
 	const passangerId = ctx.update.callback_query.data
-	if (!requestsRide[passangerId]) {
-		ctx.answerCbQuery('Заказ отменен')
+	if (!requestsRide[passangerId] || currentRides[passangerId]) {
+		ctx.answerCbQuery()
 		ctx.editMessageText('~'+ctx.update.callback_query.message.text+'~', { parse_mode: 'MarkdownV2' })
 		return
 	}
