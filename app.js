@@ -349,3 +349,7 @@ function stopApp(reason) {
 	publishTerminate()
 	database = null
 }
+
+process.on('uncaughtException', err => {
+  console.error(err && err.stack)
+});
