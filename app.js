@@ -1,5 +1,8 @@
 const { Telegraf } = require('telegraf')
+const { RateLimiter } = require('@riddea/telegraf-rate-limiter')
 const mysql = require('mysql2');
+
+const rateLimiter = new RateLimiter(1, 1000) // 1 message per 1 second
 
 // mysql setup
 const database = mysql.createConnection({
@@ -35,6 +38,11 @@ async function registerAsDriver(ctx) {
 	///Модель
 	///Цвет
 	//Госномер
+telegraf.on("message", async (ctx, next) => {
+	const limited = rateLimiter.take(ctx.from.id)
+	if (limited) return
+	await next()
+})
 }
 
 //Promise of list of cars of user
