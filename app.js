@@ -63,7 +63,6 @@ passangerQueueScene.on('callback_query', async (ctx) => {
 	const driverId = ctx.update.callback_query.data
 	ctx.session.driverId = driverId
 	ctx.session.carData = ctx.update.callback_query.message.text
-	//await telegraf.telegram.sendMessage(driverId,'Ваш текущий заказ\n' + ctx.session.request) // implement callback
 	matchingRides[ctx.from.id]()
 	delete matchingRides[ctx.from.id]
 	currentRides[ctx.from.id] = driverId
