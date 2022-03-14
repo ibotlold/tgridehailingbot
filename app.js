@@ -1,7 +1,7 @@
 const { Telegraf, Scenes, Markup, session } = require('telegraf')
 const { RateLimiter } = require('@riddea/telegraf-rate-limiter')
 const { markdownv2: format } = require('telegram-format');
-const { dbConfig } = require('./dbconfig.js')
+const { dbConfig, telegramToken } = require('./dbconfig.js')
 const mysql = require('mysql2');
 const crypto = require('crypto');
 
@@ -361,7 +361,7 @@ const driverRegistrationScene = new Scenes.WizardScene('DRIVER_REGISTRATION',
 
 
 //telegraf setup
-const telegraf = new Telegraf(process.env.YKSTEST_TOKEN)
+const telegraf = new Telegraf(telegramToken)
 telegraf.on("message", async (ctx, next) => {
 	const limited = rateLimiter.take(ctx.from.id)
 	if (limited) return
