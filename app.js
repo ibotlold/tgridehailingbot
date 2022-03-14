@@ -68,6 +68,11 @@ passangerRideScene.on('callback_query',(ctx) => {
 const passangerQueueScene = new Scenes.BaseScene('PASSANGER_QUEUE')
 passangerQueueScene.enter((ctx) => {
 	ctx.reply('Ваш заказ опубликован, ожидайте отклик\nОтменить заказ /cancel')
+  setTimeout(async () => {
+    await ctx.reply('Ваш заказ отменен')
+    delete requestsRide[ctx.from.id]
+    return ctx.scene.enter('PASSANGER_ENTER')
+  }, DRIVERS_TTL);
 })
 passangerQueueScene.command('cancel', async (ctx) => {
 	await ctx.reply('Ваш заказ отменен')
