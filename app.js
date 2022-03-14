@@ -110,7 +110,7 @@ passangerQueueScene.on('callback_query', async (ctx) => {
 	// await ctx.reply('Водитель приедет на\n' + ctx.session.carData)
   const rideId = randomRideId()
   console.log('Активирована поездка: ' + JSON.stringify({passanger: ctx.from.id, driver: driverId, rideId: {passanger: rideId, driver: driverRideId}}))
-  await ctx.replyWithMarkdownV2('Поездка: `' + randomRideId() + '`\nВодитель приедет на \n' + format.escape(ctx.session.carData))
+  await ctx.replyWithMarkdownV2('Поездка: #' + randomRideId() + '\nВодитель приедет на \n' + format.escape(ctx.session.carData))
 	return ctx.scene.enter('PASSANGER_RIDE')
 })
 
@@ -180,7 +180,7 @@ passangerEnterScene.on('text', (ctx,next) => {
 const startScene = new Scenes.BaseScene('START')
 startScene.enter((ctx) => {
 	ctx.session.status = {}
-  ctx.reply('Кем вы хотите быть?', Markup.inlineKeyboard([
+  ctx.reply('Кем вы хотите быть?\nПоддержка @yotteam', Markup.inlineKeyboard([
 		Markup.button.callback('Пассажиром', 'PASSANGER'),
 		Markup.button.callback('Водителем', 'DRIVER'),
 		]))
@@ -277,7 +277,7 @@ driverQueueScene.on('callback_query', async (ctx) => {
       	ctx.session.request = ctx.update.callback_query.message.text
         // await ctx.replyWithMarkdownV2('Поездка: `' + randomRideId() + '`\nВодитель приедет на \n' + format.escape(ctx.session.carData))
       	// await ctx.reply('Ваш текущий заказ\n' + ctx.session.request)
-        await ctx.replyWithMarkdownV2('Заказ: `' + driverRideId + '`\nВаш текущий заказ\n' + format.escape(ctx.session.request))
+        await ctx.replyWithMarkdownV2('Заказ: #' + driverRideId + '\nВаш текущий заказ\n' + format.escape(ctx.session.request))
       	return ctx.scene.enter('DRIVER_RIDE')
     },
     decline: async () => {
