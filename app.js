@@ -5,14 +5,15 @@ const { dbConfig, telegramToken } = require('./dbconfig.js')
 const mysql = require('mysql2');
 const crypto = require('crypto');
 
+const groups = {}
 var freeDrivers = []
 var requestsRide = {}
+var requestsRideQueueTTL = {}
 var currentRides = {}
 var matchingRides = {}
 
-// requestsRide['81930487']  = 'Ленина 11\nЛермонтова 49\n200\nкарта' //test ride
 
-const DRIVERS_TTL = 30 * 60 * 1000 //30 min in milliseconds
+const TTL = 0.5 * 60 * 1000 //30 min in milliseconds
 const NOTIFICATION_LIMIT = 30
 
 const rateLimiter = new RateLimiter(1, 1000) // 1 message per 1 second
@@ -33,13 +34,16 @@ function start(ctx) {
 //Passanger ride scene
 const passangerRideScene = new Scenes.BaseScene('PASSANGER_RIDE')
 passangerRideScene.enter(async (ctx) => {
+  clearTimeout(requestsRideQueueTTL[ctx.from.id])
+  delete requestsRideQueueTTL[ctx.from.id]
 	await ctx.replyWithMarkdownV2('Чат с водителем начат\n_ваши следующие сообщения идут напрямую водителю_', Markup.keyboard(['Завершить заказ']).oneTime().resize())
   currentRides[ctx.from.id].dissmis = async () => {
+    console.log(new Date() + ': Поездка завершена: ' + JSON.stringify( { passanger: ctx.from.id, driver: ctx.session.driverId, rideId: ctx.session.rideId } ))
     delete ctx.session.driverId
     delete ctx.session.carData
     currentRides[ctx.from.id].arrived()
     delete currentRides[ctx.from.id]
-	console.log(new Date() + ' Заказ завершен: ' + JSON.stringify(ctx.session))
+	console.log(new Date() + ': Заказ завершен: ' + JSON.stringify(ctx.session))
     await ctx.reply('Заказ завершен', Markup.removeKeyboard())
     return ctx.scene.enter('PASSANGER_ENTER')
   }
@@ -57,7 +61,6 @@ passangerRideScene.on('text',async (ctx,next) => {
 passangerRideScene.on('callback_query',(ctx) => {
 	ctx.answerCbQuery('Водитель уже в пути')
   ctx.editMessageText('~'+format.escape(ctx.update.callback_query.message.text)+'~', { parse_mode: 'MarkdownV2' })
-  ctx.editMessageReplyMarkup()
 })
 
 
@@ -65,13 +68,22 @@ passangerRideScene.on('callback_query',(ctx) => {
 const passangerQueueScene = new Scenes.BaseScene('PASSANGER_QUEUE')
 passangerQueueScene.enter((ctx) => {
 	ctx.reply('Ваш заказ опубликован, ожидайте отклик\nОтменить заказ /cancel')
-  // setTimeout(async () => {
-  //   await ctx.reply('Ваш заказ отменен')
-  //   delete requestsRide[ctx.from.id]
-  //   return ctx.scene.enter('PASSANGER_ENTER')
-  // }, DRIVERS_TTL);
+  requestsRideQueueTTL[ctx.from.id] = setTimeout(async () => {
+    console.log(new Date() + ': Превышено ожидание заказа: ' + ctx.from.id);
+    await ctx.reply('Долгое ожидание\nВаш заказ отменен\nПовторите заказ')
+    delete requestsRide[ctx.from.id]
+    for (const driver in matchingRides[ctx.from.id]) {
+      matchingRides[ctx.from.id][driver].decline()
+    }
+    delete requestsRideQueueTTL[ctx.from.id]
+    delete matchingRides[ctx.from.id]
+    return ctx.scene.enter('PASSANGER_ENTER')
+  }, TTL);
 })
 passangerQueueScene.command('cancel', async (ctx) => {
+  console.log(new Date() + ': Заказ отменен: ' + ctx.from.id);
+  clearTimeout(requestsRideQueueTTL[ctx.from.id])
+  delete requestsRideQueueTTL[ctx.from.id]
 	await ctx.reply('Ваш заказ отменен')
 	delete requestsRide[ctx.from.id]
 	for (const driver in matchingRides[ctx.from.id]) {
@@ -95,9 +107,11 @@ passangerQueueScene.on('callback_query', async (ctx) => {
       flag = true
     }
   }
+  if (ctx.session.time / 1000 > ctx.update.callback_query.message.date) {
+    flag = false
+  }
   if (!flag) {
     ctx.answerCbQuery('Водитель недоступен')
-    ctx.editMessageReplyMarkup()
     return ctx.editMessageText('~'+format.escape(ctx.update.callback_query.message.text)+'~', { parse_mode: 'MarkdownV2' })
   }
   ctx.answerCbQuery('Водитель подобран')
@@ -113,10 +127,9 @@ passangerQueueScene.on('callback_query', async (ctx) => {
 	delete matchingRides[ctx.from.id]
   currentRides[ctx.from.id] = {}
 	currentRides[ctx.from.id].driverId = driverId
-	// await ctx.reply('Водитель приедет на\n' + ctx.session.carData)
-  const rideId = randomRideId()
+	const rideId = randomRideId()
   ctx.session.rideId = {passanger: rideId, driver: driverRideId }
-  console.log(new Date() + 'Активирована поездка: ' + JSON.stringify({passanger: ctx.from.id, driver: driverId, rideId: {passanger: rideId, driver: driverRideId}}))
+  console.log(new Date() + ' Активирована поездка: ' + JSON.stringify({passanger: ctx.from.id, driver: driverId, rideId: {passanger: rideId, driver: driverRideId}}))
   await ctx.replyWithMarkdownV2(format.escape('Поездка: #' + randomRideId() + '\nВодитель приедет на \n' + ctx.session.carData))
 	return ctx.scene.enter('PASSANGER_RIDE')
 })
@@ -147,7 +160,7 @@ const passangerRequestScene = new Scenes.WizardScene('PASSANGER_REQUEST',
     const comment = firstLine(ctx.message.text) 
 		ctx.session.request = `${ctx.wizard.state.start}\n${ctx.wizard.state.end}\n${ctx.wizard.state.price}\n${comment}`
     if (ctx.session.request.search('http[s]?|\.com|\.ru|\/[A-я]+|undefined') != -1) {
-      console.log(new Date() + ' Спамер: ' + ctx.from.id + '\n' + ctx.session.request);
+      console.log(new Date() + ': Спамер: ' + ctx.from.id + '\n' + ctx.session.request);
       await ctx.reply('Ошибка создания заказа\nСоздайте заказ заново')
       delete ctx.session.request
       return ctx.scene.enter('PASSANGER_REQUEST')
@@ -155,6 +168,7 @@ const passangerRequestScene = new Scenes.WizardScene('PASSANGER_REQUEST',
 		const userId = ctx.from.id
 		matchingRides[userId] = {}
 		publishRequest(userId, ctx.session.request)
+    ctx.session.time = Date.now()
 		return ctx.scene.enter('PASSANGER_QUEUE')
 	},
 	)
@@ -175,6 +189,7 @@ passangerEnterScene.command('repeat', async (ctx) => {
     const userId = ctx.from.id
     matchingRides[userId] = {}
 		publishRequest(userId, ctx.session.request)
+    ctx.session.time = Date.now()
     return ctx.scene.enter('PASSANGER_QUEUE')
   } else {
     ctx.reply('Недавний заказ отсутствует\nСоздать заказ /request\nДля смены роли /start')
@@ -203,7 +218,7 @@ startScene.on('callback_query', (ctx, next) => {
 	try {
 		ctx.editMessageReplyMarkup()
 	} catch(e) {
-		console.log(e)
+		console.log('Старт первался' + e)
 	}
 	next()
 })
@@ -228,7 +243,7 @@ driverRideScene.enter(async (ctx) => {
   clearTimeout(freeDrivers[ctx.session.driverPos].ttl)
   freeDrivers = freeDrivers.filter( driver => driver.userId != ctx.from.id )
   currentRides[ctx.session.passangerId].arrived = async () => {
-    await ctx.reply(new Date() + ' Заказ завершен',Markup.removeKeyboard())
+    await ctx.reply('Заказ завершен',Markup.removeKeyboard())
     delete ctx.session.passangerId
     delete ctx.session.request
     return ctx.scene.enter('DRIVER_QUEUE')
@@ -254,15 +269,16 @@ driverQueueScene.enter(async (ctx) => {
 	await ctx.reply('Ожидайте, вам будут приходить доступные заказы.\nДля смены роли /start')
     let driverTtl = setTimeout(async () => {
       freeDrivers = freeDrivers.filter((driver) => driver.userId != ctx.from.id)
+      console.log(new Date() + ': Водитель не активен: ' + ctx.from.id);
       await ctx.reply('Время ожидания истекло\n')
       return ctx.scene.enter('START')
-    }, DRIVERS_TTL)
+    }, TTL)
     ctx.session.driverPos = freeDrivers.push({
       userId: ctx.from.id,
       car: ctx.session.carData,
       ttl: driverTtl
     }) - 1
-  console.log(new Date() + 'Активный водитель: ' + ctx.from.id);
+  console.log(new Date() + ': Активный водитель: ' + ctx.from.id);
 	console.log(JSON.stringify(ctx.session.carData))
 	getOlderRequestsForUser(ctx.from.id)
 })
@@ -289,8 +305,6 @@ driverQueueScene.on('callback_query', async (ctx) => {
     accept: async (driverRideId) => {
       	ctx.session.passangerId = passangerId
       	ctx.session.request = ctx.update.callback_query.message.text
-        // await ctx.replyWithMarkdownV2('Поездка: `' + randomRideId() + '`\nВодитель приедет на \n' + format.escape(ctx.session.carData))
-      	// await ctx.reply('Ваш текущий заказ\n' + ctx.session.request)
         await ctx.replyWithMarkdownV2(format.escape('Заказ: \#' + driverRideId + '\nВаш текущий заказ\n' + ctx.session.request))
       	return ctx.scene.enter('DRIVER_RIDE')
     },
@@ -379,19 +393,56 @@ const stage = new Scenes.Stage([
 	driverRideScene,
 	])
 telegraf.use(session())
+telegraf.catch((err,ctx) => {
+  console.log(new Date() + ': ' + ctx.from.id + ' : ' + err.message + 'ctx.session: ' + JSON.stringify(ctx.session));
+})
+telegraf.on('my_chat_member', (ctx) => {
+  const update = ctx.update.my_chat_member
+  if (update.chat.type != 'private') {
+    const status = update.new_chat_member.status
+    if (status == 'member') {
+      groups[update.chat.id] = {}
+      saveGroup(update.chat.id)
+    } else {
+      deleteGroup(update.chat.id)
+      delete groups[update.chat.id]
+    }
+  }
+})
 telegraf.use(stage.middleware())
+telegraf.use((ctx,next) => {
+  if (ctx.update.message?.text == '/status@ykstest_bot') {
+    groups[ctx.chat.id] = {}
+    return next()
+  }
+  if (ctx.from.id != ctx.chat.id) {
+    return
+  }
+  return next()
+})
 telegraf.start((ctx) => {
-	if (!ctx.session.status) {
+	if (!ctx.session.status && (ctx.from.id == ctx.chat.id)) {
 		ctx.scene.enter('START')
 	}	
+})
+
+telegraf.on('callback_query', (ctx) => {
+  ctx.answerCbQuery()
+  if (ctx.from.id == ctx.chat.id) {
+    ctx.editMessageReplyMarkup()
+    ctx.reply('Для начала используйте /start')
+  }
 })
 
 telegraf.command('status', (ctx) => {
 	ctx.reply('Свободных водителей: ' + freeDrivers.length + '\nЗаказы: ' + Object.keys(requestsRide).length + '\nАктивные поездки: ' + Object.keys(currentRides).length)
 })
 telegraf.on('text',(ctx,next) => {
-  ctx.reply('Для начала используйте /start')
+  if (ctx.from.id == ctx.chat.id) {
+    ctx.reply('Для начала используйте /start') 
+  }
 })
+loadGroups()
 telegraf.launch()
 
 function saveUserCar(userId, carData) {
@@ -415,8 +466,23 @@ function carsOfUser(userId) {
 }
 
 function publishRequest(userId, description) {
+let k = 0
+for (const chat in groups) {
+  setTimeout(() => {
+    telegraf.telegram.sendChatAction(chat,'typing')
+    .catch(err => {
+      deleteGroup(chat)
+      delete groups[chat]
+    })
+    .then(() => {
+      telegraf.telegram.sendMessage(chat,description + '\nПринять этот заказ можно в @yotykt_bot')
+    })
+  }, k * 1000)
+  k = k + 1
+}
+
 	requestsRide[userId] = description
-	console.log(new Date() + ' Заказ:\n' + JSON.stringify(requestsRide))
+	console.log(new Date() + ' Заказ:' + JSON.stringify(requestsRide))
   	new Promise( async (resolve, reject) => {
       let count = 0 //Count for driver notification limit
       for (const driver of freeDrivers) {
@@ -430,6 +496,39 @@ function publishRequest(userId, description) {
 	}).catch((error) => {
 		console.log('Error when notifying of drivers')
 	})
+}
+
+function loadGroups() {
+	const query = database.query(
+		'SELECT `group_id` FROM `groups`',(err, result) => {
+      if (err) {
+        return console.log(new Date() + ' Ошибка загрузки групп: ' + err.message);
+      }
+      for (const group in result) {
+        const id = result[group].group_id
+        groups[id] = {}
+      }
+    }
+    )
+}
+
+function saveGroup(id) {
+  database.promise().query(
+    'INSERT INTO `groups` (group_id) VALUES (?)',
+    [id]
+  )
+  .catch(error => {
+    console.log(new Date() + ' : ' + error.message);
+  })
+}
+
+function deleteGroup(id) {
+  database.promise().query(
+    'DELETE FROM `groups` WHERE group_id = ?',
+    [id]
+  ).catch(error => {
+    console.log(new Date() + ' : ' + error.message);
+  })
 }
 
 async function publishTerminate() {
@@ -458,7 +557,7 @@ telegraf.stop(reason)
 database.destroy()
 }
 process.on('uncaughtException', err => {
-  console.error(err && err.stack)
+  console.error(err.message && err.stack)
 })
 
 function firstLine(string) {
