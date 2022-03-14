@@ -69,11 +69,11 @@ passangerRideScene.on('callback_query',(ctx) => {
 const passangerQueueScene = new Scenes.BaseScene('PASSANGER_QUEUE')
 passangerQueueScene.enter((ctx) => {
 	ctx.reply('Ваш заказ опубликован, ожидайте отклик\nОтменить заказ /cancel')
-  setTimeout(async () => {
-    await ctx.reply('Ваш заказ отменен')
-    delete requestsRide[ctx.from.id]
-    return ctx.scene.enter('PASSANGER_ENTER')
-  }, DRIVERS_TTL);
+  // setTimeout(async () => {
+  //   await ctx.reply('Ваш заказ отменен')
+  //   delete requestsRide[ctx.from.id]
+  //   return ctx.scene.enter('PASSANGER_ENTER')
+  // }, DRIVERS_TTL);
 })
 passangerQueueScene.command('cancel', async (ctx) => {
 	await ctx.reply('Ваш заказ отменен')
@@ -119,9 +119,9 @@ passangerQueueScene.on('callback_query', async (ctx) => {
 	currentRides[ctx.from.id].driverId = driverId
 	// await ctx.reply('Водитель приедет на\n' + ctx.session.carData)
   const rideId = randomRideId()
-  ctx.session.rideId = {passanger: rideId, driver: driverRideId}
+  ctx.session.rideId = {passanger: rideId, driver: driverRideId }
   console.log(new Date() + 'Активирована поездка: ' + JSON.stringify({passanger: ctx.from.id, driver: driverId, rideId: {passanger: rideId, driver: driverRideId}}))
-  await ctx.replyWithMarkdownV2('Поездка: #' + randomRideId() + '\nВодитель приедет на \n' + format.escape(ctx.session.carData))
+  await ctx.replyWithMarkdownV2(format.escape('Поездка: #' + randomRideId() + '\nВодитель приедет на \n' + ctx.session.carData))
 	return ctx.scene.enter('PASSANGER_RIDE')
 })
 
@@ -288,7 +288,7 @@ driverQueueScene.on('callback_query', async (ctx) => {
       	ctx.session.request = ctx.update.callback_query.message.text
         // await ctx.replyWithMarkdownV2('Поездка: `' + randomRideId() + '`\nВодитель приедет на \n' + format.escape(ctx.session.carData))
       	// await ctx.reply('Ваш текущий заказ\n' + ctx.session.request)
-        await ctx.replyWithMarkdownV2('Заказ: #' + driverRideId + '\nВаш текущий заказ\n' + format.escape(ctx.session.request))
+        await ctx.replyWithMarkdownV2(format.escape('Заказ: \#' + driverRideId + '\nВаш текущий заказ\n' + ctx.session.request))
       	return ctx.scene.enter('DRIVER_RIDE')
     },
     decline: async () => {
