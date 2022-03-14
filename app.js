@@ -13,7 +13,7 @@ var currentRides = {}
 var matchingRides = {}
 
 
-const TTL = 0.5 * 60 * 1000 //30 min in milliseconds
+const TTL = 30 * 60 * 1000 //30 min in milliseconds
 const NOTIFICATION_LIMIT = 30
 
 const rateLimiter = new RateLimiter(1, 1000) // 1 message per 1 second
