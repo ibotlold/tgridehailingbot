@@ -43,6 +43,7 @@ passangerRideScene.enter(async (ctx) => {
     delete ctx.session.carData
     currentRides[ctx.from.id].arrived()
     delete currentRides[ctx.from.id]
+	console.log(new Date() + 'Заказ завершен: ' + JSON.stringify(ctx.session))
     await ctx.reply('Заказ завершен', Markup.removeKeyboard())
     return ctx.scene.enter('PASSANGER_ENTER')
   }
@@ -77,6 +78,10 @@ passangerQueueScene.enter((ctx) => {
 passangerQueueScene.command('cancel', async (ctx) => {
 	await ctx.reply('Ваш заказ отменен')
 	delete requestsRide[ctx.from.id]
+	for (const driver in matchingRides[ctx.from.id]) {
+		matchingRides[ctx.from.id][driver].decline()
+	}
+	delete matchingRides[ctx.from.id]
 	return ctx.scene.enter('PASSANGER_ENTER')
 })
 passangerQueueScene.on('text', async (ctx,next) => {
@@ -114,7 +119,8 @@ passangerQueueScene.on('callback_query', async (ctx) => {
 	currentRides[ctx.from.id].driverId = driverId
 	// await ctx.reply('Водитель приедет на\n' + ctx.session.carData)
   const rideId = randomRideId()
-  console.log('Активирована поездка: ' + JSON.stringify({passanger: ctx.from.id, driver: driverId, rideId: {passanger: rideId, driver: driverRideId}}))
+  ctx.session.rideId = {passanger: rideId, driver: driverRideId}
+  console.log(new Date() + 'Активирована поездка: ' + JSON.stringify({passanger: ctx.from.id, driver: driverId, rideId: {passanger: rideId, driver: driverRideId}}))
   await ctx.replyWithMarkdownV2('Поездка: #' + randomRideId() + '\nВодитель приедет на \n' + format.escape(ctx.session.carData))
 	return ctx.scene.enter('PASSANGER_RIDE')
 })
@@ -253,7 +259,7 @@ driverQueueScene.enter(async (ctx) => {
       car: ctx.session.carData,
       ttl: driverTtl
     }) - 1
-  console.log('Активный водитель: ' + ctx.from.id);
+  console.log(new Date() + 'Активный водитель: ' + ctx.from.id);
 	console.log(JSON.stringify(ctx.session.carData))
 	getOlderRequestsForUser(ctx.from.id)
 })
@@ -407,7 +413,7 @@ function carsOfUser(userId) {
 
 function publishRequest(userId, description) {
 	requestsRide[userId] = description
-	console.log('Заказ:\n' + JSON.stringify(requestsRide))
+	console.log(new Date() + 'Заказ:\n' + JSON.stringify(requestsRide))
   	new Promise( async (resolve, reject) => {
       let count = 0 //Count for driver notification limit
       for (const driver of freeDrivers) {
