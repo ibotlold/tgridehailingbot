@@ -1,6 +1,7 @@
 const { Telegraf, Scenes, Markup, session } = require('telegraf')
 const { RateLimiter } = require('@riddea/telegraf-rate-limiter')
 const { markdownv2: format } = require('telegram-format');
+const { dbConfig } = require('./dbconfig.js')
 const mysql = require('mysql2');
 const crypto = require('crypto');
 
@@ -17,12 +18,7 @@ const NOTIFICATION_LIMIT = 30
 const rateLimiter = new RateLimiter(1, 1000) // 1 message per 1 second
 
 // mysql setup
-const database = mysql.createConnection({
-  host: process.env.YKSTEST_DBHOST,
-  user: process.env.YKSTEST_DBUSER,
-  password: process.env.YKSTEST_DBPASS,
-  database: process.env.YKSTEST_DB
-})
+const database = mysql.createConnection(dbConfig)
 
 //telegraf stop
 process.once('SIGINT', async () => await stopApp('SIGINT'))
