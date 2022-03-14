@@ -39,7 +39,7 @@ passangerRideScene.enter(async (ctx) => {
     delete ctx.session.carData
     currentRides[ctx.from.id].arrived()
     delete currentRides[ctx.from.id]
-	console.log(new Date() + 'Заказ завершен: ' + JSON.stringify(ctx.session))
+	console.log(new Date() + ' Заказ завершен: ' + JSON.stringify(ctx.session))
     await ctx.reply('Заказ завершен', Markup.removeKeyboard())
     return ctx.scene.enter('PASSANGER_ENTER')
   }
@@ -125,30 +125,37 @@ passangerQueueScene.on('callback_query', async (ctx) => {
 //create request scene
 const passangerRequestScene = new Scenes.WizardScene('PASSANGER_REQUEST',
 	(ctx) => {
-		ctx.reply('Введите начальный адрес')
+		ctx.reply('Только в одну строку!\nВведите начальный адрес')
 		return ctx.wizard.next()
 	},
 	(ctx) => {
-		ctx.wizard.state.start = ctx.message.text
+		ctx.wizard.state.start = firstLine(ctx.message.text)
 		ctx.reply('Введите конечный адрес')
 		return ctx.wizard.next()
 	},
 	(ctx) => {
-		ctx.wizard.state.end = ctx.message.text
+		ctx.wizard.state.end = firstLine(ctx.message.text)
 		ctx.reply('Введите цену')
 		return ctx.wizard.next()
 	},
 	(ctx) => {
-		ctx.wizard.state.price = ctx.message.text
+		ctx.wizard.state.price = firstLine(ctx.message.text)
 		ctx.reply('Введите способ оплаты,\nа также дополнительный комментарий для водителя\n_\\(например, подъезд, сколько человек и т\\.д\\.\\)_',{ parse_mode: 'MarkdownV2'})
 		return ctx.wizard.next()
 	},
-	(ctx) => {
-		ctx.session.request = `${ctx.wizard.state.start}\n${ctx.wizard.state.end}\n${ctx.wizard.state.price}\n${ctx.message.text}`
-    const userId = ctx.from.id
-    matchingRides[userId] = {}
+	async (ctx) => {
+    const comment = firstLine(ctx.message.text) 
+		ctx.session.request = `${ctx.wizard.state.start}\n${ctx.wizard.state.end}\n${ctx.wizard.state.price}\n${comment}`
+    if (ctx.session.request.search('http[s]?|\.com|\.ru|\/[A-я]+|undefined') != -1) {
+      console.log(new Date() + ' Спамер: ' + ctx.from.id + '\n' + ctx.session.request);
+      await ctx.reply('Ошибка создания заказа\nСоздайте заказ заново')
+      delete ctx.session.request
+      return ctx.scene.enter('PASSANGER_REQUEST')
+    }
+		const userId = ctx.from.id
+		matchingRides[userId] = {}
 		publishRequest(userId, ctx.session.request)
-    return ctx.scene.enter('PASSANGER_QUEUE')
+		return ctx.scene.enter('PASSANGER_QUEUE')
 	},
 	)
 
@@ -221,7 +228,7 @@ driverRideScene.enter(async (ctx) => {
   clearTimeout(freeDrivers[ctx.session.driverPos].ttl)
   freeDrivers = freeDrivers.filter( driver => driver.userId != ctx.from.id )
   currentRides[ctx.session.passangerId].arrived = async () => {
-    await ctx.reply('Заказ завершен',Markup.removeKeyboard())
+    await ctx.reply(new Date() + ' Заказ завершен',Markup.removeKeyboard())
     delete ctx.session.passangerId
     delete ctx.session.request
     return ctx.scene.enter('DRIVER_QUEUE')
@@ -409,7 +416,7 @@ function carsOfUser(userId) {
 
 function publishRequest(userId, description) {
 	requestsRide[userId] = description
-	console.log(new Date() + 'Заказ:\n' + JSON.stringify(requestsRide))
+	console.log(new Date() + ' Заказ:\n' + JSON.stringify(requestsRide))
   	new Promise( async (resolve, reject) => {
       let count = 0 //Count for driver notification limit
       for (const driver of freeDrivers) {
@@ -453,6 +460,14 @@ database.destroy()
 process.on('uncaughtException', err => {
   console.error(err && err.stack)
 })
+
+function firstLine(string) {
+  const line = string.split('\n')[0]
+  if (line.length > 40) {
+    return '/слишком длинная строка'
+  }
+  return string
+}
 
 function randomRideId() {
   return crypto.randomUUID().substring(0,8)
