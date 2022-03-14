@@ -305,7 +305,7 @@ driverQueueScene.on('callback_query', async (ctx) => {
     accept: async (driverRideId) => {
       	ctx.session.passangerId = passangerId
       	ctx.session.request = ctx.update.callback_query.message.text
-        await ctx.replyWithMarkdownV2(format.escape('Заказ: \#' + driverRideId + '\nВаш текущий заказ\n' + ctx.session.request))
+        await ctx.replyWithMarkdownV2(format.escape('Ваш текущий заказ: \#' + driverRideId + '\n' + ctx.session.request))
       	return ctx.scene.enter('DRIVER_RIDE')
     },
     decline: async () => {
@@ -482,7 +482,7 @@ for (const chat in groups) {
 }
 
 	requestsRide[userId] = description
-	console.log(new Date() + ' Заказ:' + JSON.stringify(requestsRide))
+	console.log(new Date() + ': Заказ: ' + JSON.stringify(requestsRide))
   	new Promise( async (resolve, reject) => {
       let count = 0 //Count for driver notification limit
       for (const driver of freeDrivers) {
