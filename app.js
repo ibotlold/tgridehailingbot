@@ -402,8 +402,10 @@ telegraf.on('my_chat_member', (ctx) => {
     const status = update.new_chat_member.status
     if (status == 'member') {
       groups[update.chat.id] = {}
+      console.log(new Date() + ': Бота добавили в :' + JSON.stringify(update.chat));
       saveGroup(update.chat.id)
-    } else {
+    } else if (status == 'left') {
+      console.log(new Date() + ': Бота удалили из :' + JSON.stringify(update.chat));
       deleteGroup(update.chat.id)
       delete groups[update.chat.id]
     }
@@ -412,6 +414,10 @@ telegraf.on('my_chat_member', (ctx) => {
 telegraf.use(stage.middleware())
 telegraf.use((ctx,next) => {
   if (ctx.update.message?.text == '/status@yotykt_bot') {
+    if (!groups[ctx.chat.id]) {
+      console.log(new Date() + ': Бота добавили в :' + JSON.stringify(ctx.update.chat));
+      saveGroup(ctx.chat.id)
+    }
     groups[ctx.chat.id] = {}
     return next()
   }
@@ -470,12 +476,19 @@ let k = 0
 for (const chat in groups) {
   setTimeout(() => {
     telegraf.telegram.sendChatAction(chat,'typing')
-    .catch(err => {
-      deleteGroup(chat)
-      delete groups[chat]
+    .catch((err) => {
+      console.log(new Date());
+      if (err.code == 403) {
+        console.log(new Date() + ': Бота удалили из :' + JSON.stringify(chat));
+        deleteGroup(chat)
+        delete groups[chat]
+      }
     })
     .then(() => {
-      telegraf.telegram.sendMessage(chat,description + '\nПринять этот заказ можно в @yotykt_bot')
+      return telegraf.telegram.sendMessage(chat,description + '\nПринять этот заказ можно в @yotykt_bot')
+    })
+    .catch(err => {
+      console.log('ошибка');
     })
   }, k * 1000)
   k = k + 1
