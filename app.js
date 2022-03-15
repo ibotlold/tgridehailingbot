@@ -411,7 +411,7 @@ telegraf.on('my_chat_member', (ctx) => {
 })
 telegraf.use(stage.middleware())
 telegraf.use((ctx,next) => {
-  if (ctx.update.message?.text == '/status@ykstest_bot') {
+  if (ctx.update.message?.text == '/status@yotykt_bot') {
     groups[ctx.chat.id] = {}
     return next()
   }
