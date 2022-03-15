@@ -284,6 +284,7 @@ driverQueueScene.enter(async (ctx) => {
 })
 driverQueueScene.command('start',(ctx) => {
   clearTimeout(freeDrivers[ctx.session.driverPos].ttl)
+  console.log(new Date() + ': Водитель не активен: ' + ctx.from.id);
 	freeDrivers = freeDrivers.filter( driver => driver.userId != ctx.from.id)
 	return ctx.scene.enter('START')
 })
