@@ -401,11 +401,11 @@ telegraf.on('my_chat_member', (ctx) => {
   const update = ctx.update.my_chat_member
   if (update.chat.type != 'private') {
     const status = update.new_chat_member.status
-    if (status == 'member') {
-      groups[update.chat.id] = {}
+    if (status == 'member' || status == 'administrator') {
+      groups[update.chat?.id] = {}
       console.log(new Date() + ': Бота добавили в :' + JSON.stringify(update.chat));
       saveGroup(update.chat.id)
-    } else if (status == 'left') {
+    } else if (status == 'left' || status == 'kicked') {
       console.log(new Date() + ': Бота удалили из :' + JSON.stringify(update.chat));
       deleteGroup(update.chat.id)
       delete groups[update.chat.id]
@@ -478,7 +478,6 @@ for (const chat in groups) {
   setTimeout(() => {
     telegraf.telegram.sendChatAction(chat,'typing')
     .catch((err) => {
-      console.log(new Date());
       if (err.code == 403) {
         console.log(new Date() + ': Бота удалили из :' + JSON.stringify(chat));
         deleteGroup(chat)
@@ -488,8 +487,13 @@ for (const chat in groups) {
     .then(() => {
       return telegraf.telegram.sendMessage(chat,description + '\nПринять этот заказ можно в @yotykt_bot')
     })
-    .catch(err => {
+    .catch((err) => {
       console.log('ошибка');
+      if (err.code == 403) {
+        console.log(new Date() + ': Бота удалили из канала:' + JSON.stringify(chat));
+        deleteGroup(chat)
+        delete groups[chat]
+      }
     })
   }, k * 1000)
   k = k + 1
