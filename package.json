@@ -1,0 +1,26 @@
+{
+  "name": "yottg",
+  "version": "1.0.0-beta",
+  "description": "Telegram @yotykt_bot",
+  "main": "./build/app.js",
+  "scripts": {
+    "start:build": "tsc -w",
+    "start:run": "nodemon build/app.js",
+    "start": "concurrently npm:start:build npm:start:run"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ibotlold/tgridehailingbot.git"
+  },
+  "keywords": [
+    "telegram",
+    "telegraf",
+    "bot"
+  ],
+  "author": "Kirill Prokpev <ibotlold@gmail.com>",
+  "license": "PRIVATE",
+  "bugs": {
+    "url": "https://github.com/ibotlold/tgridehailingbot/issues"
+  },
+  "homepage": "https://github.com/ibotlold/tgridehailingbot#readme"
+}
