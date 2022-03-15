@@ -415,7 +415,7 @@ telegraf.use(stage.middleware())
 telegraf.use((ctx,next) => {
   if (ctx.update.message?.text == '/status@yotykt_bot') {
     if (!groups[ctx.chat.id]) {
-      console.log(new Date() + ': Бота добавили в :' + JSON.stringify(ctx.update.chat));
+      console.log(new Date() + ': Бота добавили в :' + JSON.stringify(ctx.update.message?.chat));
       saveGroup(ctx.chat.id)
     }
     groups[ctx.chat.id] = {}
