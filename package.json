@@ -22,5 +22,8 @@
   "bugs": {
     "url": "https://github.com/ibotlold/tgridehailingbot/issues"
   },
-  "homepage": "https://github.com/ibotlold/tgridehailingbot#readme"
+  "homepage": "https://github.com/ibotlold/tgridehailingbot#readme",
+  "dependencies": {
+    "telegraf-develop": "^5.1.3"
+  }
 }
