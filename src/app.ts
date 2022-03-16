@@ -1,5 +1,6 @@
 import { Telegraf } from 'telegraf'
 import { Config } from './config'
+import { Controller } from './controller'
 
 const BOT_TOKEN = Config.TOKEN()
 
