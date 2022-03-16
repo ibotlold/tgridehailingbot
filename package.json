@@ -25,7 +25,9 @@
   "homepage": "https://github.com/ibotlold/tgridehailingbot#readme",
   "dependencies": {
     "@types/node": "^17.0.21",
-    "mysql2": "^2.3.3",
-    "telegraf-develop": "^5.1.3"
+    "mysql2": "^2.3.3"
+  },
+  "devDependencies": {
+    "typescript": "^4.6.2"
   }
 }
