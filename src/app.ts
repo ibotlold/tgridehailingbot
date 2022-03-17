@@ -1,3 +1,4 @@
+import { Router } from '@grammyjs/router'
 import { Bot } from 'grammy'
 import { Config } from './config'
 
@@ -5,10 +6,14 @@ const BOT_TOKEN = Config.TOKEN()
 
 const bot = new Bot(BOT_TOKEN)
 
-bot.on('message:text',(ctx) => {
-    console.log('New update')
+const router = new Router(ctx => {
+    console.log(ctx);
     
-    console.log(ctx.update)
-    
+    return 'hello'
 })
+
+router.route('hello', ctx => {
+    ctx.reply('hello')
+})
+bot.use(router)
 bot.start()
