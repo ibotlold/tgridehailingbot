@@ -25,6 +25,7 @@
   "homepage": "https://github.com/ibotlold/tgridehailingbot#readme",
   "dependencies": {
     "@types/node": "^17.0.21",
+    "grammy": "^1.7.0",
     "mysql2": "^2.3.3"
   },
   "devDependencies": {
