@@ -1,5 +1,9 @@
-const BOT_TOKEN = process.env.YKSTEST_TOKEN
-const MongoDB_URL = process.env.YKSTEST_DB_URL
+import { logger } from "./logger"
+
+const BOT_TOKEN = process.env.BOT_TOKEN
+const MongoDB_URL = process.env.BOT_DB_URL
+const Support_URL = process.env.BOT_SUPPORT_URL
+
 
 /**
  * Return config environment variables
@@ -13,18 +17,22 @@ export class Config {
      * @returns `string`
      */
     public static TOKEN():string {
-        if (typeof BOT_TOKEN !== 'string') {
-            console.error('Telegram Bot API authentication token not set')
-            process.exit(1)
-        }
-        return BOT_TOKEN
+        return shouldBeString(BOT_TOKEN, 'BOT_TOKEN')
     }
 
     public static MONGODB_URL():string {
-        if (typeof MongoDB_URL !== 'string') {
-            console.error('Mongo DB authentication URL not set')
-            process.exit(1)
-        }
-        return MongoDB_URL
+        return shouldBeString(MongoDB_URL, 'MongoDB_URL')
     }
+
+    public static SUPPORT_URL():string {
+        return shouldBeString(Support_URL, 'Support_URL')
+    }
+}
+
+function shouldBeString(string: string | undefined, name: string):string {
+    if (typeof string !== 'string') {
+        logger.error(`String ${name} is not set`)
+        process.exit(1)
+    }
+    return string
 }

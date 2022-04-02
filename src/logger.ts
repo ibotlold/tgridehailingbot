@@ -1,12 +1,9 @@
 import winston from "winston";
-const { combine, timestamp, label, printf } = winston.format
+const { combine, timestamp } = winston.format
 
 export const logger = winston.createLogger({
     level: 'debug',
     format: combine(timestamp(),winston.format.json()),
-    defaultMeta: {
-        service: 'tgbot'
-    },
     transports: [
         new winston.transports.File({
             filename: 'error.log', level: 'error'
