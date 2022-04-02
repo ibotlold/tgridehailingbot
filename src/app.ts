@@ -1,5 +1,4 @@
 import { Bot } from 'grammy'
-import { type } from 'os'
 import { Config } from './config'
 
 import { connectToDatabase } from './database'
@@ -22,18 +21,15 @@ connectToDatabase()
     bot.start()
     logger.info('Bot started')
     bot.catch((error) => {
-        logger.error(JSON.stringify(error, null, '  '))
+        logger.error(error.message, { stack: error.stack } )
     })
 })
 .catch((error: Error) => {
     logger.error('Error trying to connect to database')
-    logger.error(JSON.stringify(error))
+    logger.error(error.message, { stack: error.stack } )
     process.exit(1)
 })
 
 process.on('uncaughtException',(error) => {
-    logger.error(`${error.name}:\n${error.message}`, {
-        stack: error.stack,
-        type: 'process'
-    })
+    logger.error('uncaughtException', { stack: error.stack })
 })
