@@ -1,6 +1,5 @@
-import { MongoError } from "mongodb";
 import { collections } from "../database";
-import { logger } from "../logger";
+import { logger } from "./utils";
 import UserModel from "../models/user";
 
 export async function userDidChangedStatus(userId:number, status: string):Promise<void> {
