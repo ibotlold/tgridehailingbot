@@ -6,12 +6,8 @@ import { supportInlineButton } from "../utils";
 const chat = new Composer()
 
 chat.command('start', async ctx => {
-    try {
-        await ctx.replyWithChatAction('typing')
-    } catch(error) {
-        logger.error('Error reply on /start', { error })
-    }
-    ctx.reply('Выберите роль:', {
+    await ctx.replyWithChatAction('typing')
+    await ctx.reply('Выберите роль:', {
         reply_markup: new InlineKeyboard()
         .text('Пассажир', Roles.PASSANGER)
         .text('Водитель', Roles.DRIVER)

@@ -1,6 +1,6 @@
 import { ObjectId } from 'mongodb'
 
-export default class User {
+export default class UserModel {
     public _id?: ObjectId
     public role?: string
     constructor(

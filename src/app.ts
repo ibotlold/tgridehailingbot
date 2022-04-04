@@ -1,4 +1,4 @@
-import { Bot } from 'grammy'
+import { Bot, BotError, GrammyError } from 'grammy'
 import { Config } from './config'
 
 import { connectToDatabase } from './database'
@@ -26,6 +26,14 @@ connectToDatabase()
     bot.start()
     logger.info('Bot started')
     bot.catch((error) => {
+        if (error instanceof BotError) {
+            let innerError = error.error
+            if (innerError instanceof GrammyError) {
+                if (innerError.error_code === 403) {
+                    return
+                }
+            }
+        }
         logger.error(error.message, { stack: error.stack } )
     })
 })
