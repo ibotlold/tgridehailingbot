@@ -9,7 +9,12 @@ import publicChat from './public-chat/public-chat'
 
 const BOT_TOKEN = Config.TOKEN()
 
-export const bot = new Bot(BOT_TOKEN)
+const bot = new Bot(BOT_TOKEN)
+
+export enum Roles {
+    PASSANGER = 'PASSANGER',
+    DRIVER = 'DRIVER'
+}
 
 logger.verbose('Connecting to database...')
 connectToDatabase()
