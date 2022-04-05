@@ -1,6 +1,6 @@
 import { Composer, InlineKeyboard } from "grammy";
 import { Roles } from "../../app";
-import { findUserById, isMainMessage, userDidSelectedRole } from "../private-chat-controller";
+import { isMainMessage, userDidSelectRole } from "../private-chat-controller";
 import { logger, supportInlineButton } from "../utils";
 
 const chat = new Composer()
@@ -28,7 +28,7 @@ chat.on('callback_query:data').filter(async ctx => {
         await next()
     }
 
-    await userDidSelectedRole(ctx.from.id, ctx.callbackQuery.data as Roles)
+    await userDidSelectRole(ctx.from.id, ctx.callbackQuery.data as Roles)
     logger.debug('User selected role',{ user: { userId: ctx.from.id, role: ctx.callbackQuery.data } })
 })
 

@@ -5,6 +5,7 @@ import { Roles } from "../app";
 
 export enum States {
     Start = 'start',
+    Registration = 'registration',
     Ready = 'ready'
 }
 
@@ -27,17 +28,20 @@ async function setState(userId:number, state: States):Promise<void> {
     })
 }
 
-export async function userDidSelectedRole(userId:number, role: Roles):Promise<void> {
-    await collections.users?.updateOne({
-        userId: userId
-    }, {
+export async function userDidSelectRole(userId:number, role: Roles):Promise<void> {
+    const userFromDB = await findUserById(userId)
+    if (!userFromDB) {
+        throw new Error('User does not exists')
+    }
+    await collections.users?.updateOne(userFromDB, {
         $set: { role: role }
     })
+    
     logger.info('User selected role', { user: { userId: userId, role: role} })
 }
 
 
-export async function userDidChangedStatus(userId:number, status: string):Promise<void> {
+export async function userDidChangeStatus(userId:number, status: string):Promise<void> {
     const user:UserModel = { userId: userId, status: status }
     const userFromDB = await findUserById(userId)
     if (!userFromDB) {
