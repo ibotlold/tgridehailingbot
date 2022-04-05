@@ -3,7 +3,7 @@ import { logger } from "./utils";
 import UserModel from "../models/user";
 
 export async function userDidChangedStatus(userId:number, status: string):Promise<void> {
-    const user = new UserModel(userId, status)
+    const user:UserModel = { userId: userId, status: status }
     const userFromDB = await collections.users?.findOne({
         userId: user.userId
     })
