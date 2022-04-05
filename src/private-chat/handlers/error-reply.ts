@@ -1,4 +1,5 @@
 import { Composer, InlineKeyboard } from "grammy";
+import { userDidStarted } from "../private-chat-controller";
 import { logger } from "../utils";
 import { supportInlineButton } from "../utils";
 
@@ -17,8 +18,9 @@ chat.on('callback_query', ctx => {
 })
 chat.use(async ctx => {
     logger.verbose('User in dead end', { update: ctx.update } )
-    ctx.reply('Воспользуйтесь /start', {
+    const message = await ctx.reply('Воспользуйтесь /start', {
         reply_markup: new InlineKeyboard().row(supportInlineButton)
     })
+    await userDidStarted(ctx.from!.id, message.message_id)
 })
 export default chat

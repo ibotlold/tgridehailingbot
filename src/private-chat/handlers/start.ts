@@ -1,6 +1,6 @@
 import { Composer, InlineKeyboard } from "grammy";
 import { Roles } from "../../app";
-import { setMainMessage } from "../private-chat-controller";
+import { userDidStarted } from "../private-chat-controller";
 import { logger } from "../utils";
 import { supportInlineButton } from "../utils";
 
@@ -15,7 +15,7 @@ chat.command('start', async ctx => {
         .text('Водитель', Roles.DRIVER)
         .row(supportInlineButton)
     })
-    await setMainMessage(ctx.from!.id, message.message_id)
+    await userDidStarted(ctx.from!.id, message.message_id)
 })
 
 
