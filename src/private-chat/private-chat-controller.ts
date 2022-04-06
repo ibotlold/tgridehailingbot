@@ -1,93 +1,62 @@
 import { collections } from "../database";
-import { logger } from "./utils";
-import UserModel from "../models/user";
-import { Roles } from "../app";
+import { logger } from "../logger";
+import { States } from "./handlers/routers/main-router";
 
-export enum States {
-    Start = 'start',
-    Registration = 'registration',
-    Ready = 'ready'
+export enum Roles {
+    Passanger = 'passanger',
+    Driver = 'driver'
 }
 
-
-export async function getState(userId:number):Promise<string> {
-    const user = await findUserById(userId)
-    return user?.state || States.Start
-}
-
-export async function userDidStarted(userId:number, message_id: number) {
-    await setMainMessage(userId, message_id)
-    await setState(userId, States.Start)
-}
-
-async function setState(userId:number, state: States):Promise<void> {
-    await collections.users?.updateOne({ userId: userId }, {
-        $set: {
-            state: States.Start
-        }
-    })
-}
-
-export async function userDidSelectRole(userId:number, role: Roles):Promise<void> {
-    const userFromDB = await findUserById(userId)
-    if (!userFromDB) {
-        throw new Error('User does not exists')
-    }
-    await collections.users?.updateOne(userFromDB, {
-        $set: { role: role }
-    })
-    
-    logger.info('User selected role', { user: { userId: userId, role: role} })
-}
-
-
-export async function userDidChangeStatus(userId:number, status: string):Promise<void> {
-    const user:UserModel = { userId: userId, status: status }
-    const userFromDB = await findUserById(userId)
-    if (!userFromDB) {
-        await collections.users?.insertOne(user)
-        return
-    }
-    await collections.users?.updateOne(userFromDB, {
-        $set: { status: user.status},
-        $unset: { mainMessage: '', state: '' }
-    })
-    logger.info('Updated user status', { user: user })
-}
-
-/**
- * Resets user to initial state
- * @param userId 
- * @param message_id 
- */
-async function setMainMessage(userId:number, message_id:number):Promise<void> {
-    const user = await findUserById(userId)
-    if (!user) {
-        throw new Error('User not found')
-    }
-    await collections.users?.updateOne(user, {
-        $set: {
-            mainMessage: message_id,
-            state: States.Start
-        },
-        $unset: {
-            role: ''
-        }
-    })
-    logger.verbose('Main message updated', { user: userId, message_id: message_id })
-}
-
-export async function findUserById(userId:number):Promise<UserModel | undefined | null> {
+export async function userDidChangedStatus(userId:number, newStatus: string):Promise<void> {
     const userFromDB = await collections.users?.findOne({
         userId: userId
     })
-    return userFromDB
+    if (!userFromDB) {
+        await collections.users!.insertOne({
+            userId: userId,
+            status: newStatus
+        })
+        logger.debug('Created new user', { user: { userId: userId, status: newStatus } })
+        return
+    }
+    await collections.users?.updateOne(userFromDB, {
+        $set: { status: newStatus }
+    })
+    logger.debug('Updated user status', { user: userFromDB })
 }
 
-export async function isMainMessage(userId:number, message_id:number):Promise<boolean> {
-    const user = await findUserById(userId)
-    if (user?.mainMessage === message_id) {
-        return true
-    }
-    return false
+export async function setMainMessage(userId:number, messageId: number):Promise<void> {
+    const user = await collections.users!.findOne({
+        userId: userId
+    })
+    await collections.users!.updateOne(user!, {
+        $set: {
+            mainMessage: messageId
+        }
+    })
+}
+
+export async function getMainMessage(userId:number) {
+    const user = await collections.users!.findOne({
+        userId: userId
+    })
+    return user?.mainMessage
+}
+
+export async function getUserState(userId:number):Promise<States | undefined> {
+    const user = await collections.users!.findOne({
+        userId: userId
+    })
+    logger.debug('Find user state', { user: {userId: userId, state: user!.state } })
+    return user!.state
+}
+
+export async function setUserState(userId:number, state: States):Promise<void> {
+    const user = await collections.users!.findOne({
+        userId: userId
+    })
+    await collections.users!.updateOne(user!,{
+        $set: { state: state }
+    })
+    logger.debug('Update user state', { user: {userId: userId, state: state } })
 }

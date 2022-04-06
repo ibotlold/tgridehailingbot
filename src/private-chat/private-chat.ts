@@ -1,23 +1,17 @@
-import { Composer } from "grammy";
-import { Router } from "@grammyjs/router";
-import { getState, States } from "./private-chat-controller";
-
+import { Router } from "@grammyjs/router"
+import { Composer } from "grammy"
+import mainRouter, { States } from "./handlers/routers/main-router"
 import errorReply from './handlers/error-reply'
-import users from './handlers/users'
+import user from './handlers/middlewares/user'
 import start from './handlers/start'
-import roleSelect from "./handlers/role-select";
+import roleSelect from './handlers/roleSelect'
 
+const router = new Router(mainRouter)
+router.route(States.roleSelect, roleSelect)
 
 const chat = new Composer()
-chat.use(users)
-chat.use(start)
-const router = new Router(async ctx => {
-    if (!ctx.from?.id) {
-        return undefined
-    }
-    return getState(ctx.from.id)
-})
-router.route(States.Start, roleSelect)
+chat.on('my_chat_member:from', user)
+chat.command('start', start)
 chat.use(router)
 chat.use(errorReply)
 

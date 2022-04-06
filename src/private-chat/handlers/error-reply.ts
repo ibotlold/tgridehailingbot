@@ -1,26 +1,28 @@
 import { Composer, InlineKeyboard } from "grammy";
-import { userDidStarted } from "../private-chat-controller";
-import { logger } from "../utils";
+import { logger, setMainMessage } from "../utils";
 import { supportInlineButton } from "../utils";
-
+import { changeState, States } from "./routers/main-router";
 
 const chat = new Composer()
-chat.on('callback_query', ctx => {
+chat.on('callback_query', async ctx => {
     logger.verbose('User clicked wrong callback keyboard')
     logger.debug(JSON.stringify({
         user: ctx.from.id,
         callback: ctx.callbackQuery.data
     }))
-    ctx.answerCallbackQuery('Ошибка')
-    ctx.editMessageText('Воспользуйтесь /start', {
+    await ctx.editMessageText('Воспользуйтесь /start', {
         reply_markup: new InlineKeyboard().row(supportInlineButton)
     })
+    await ctx.answerCallbackQuery('Ошибка')
 })
-chat.use(async ctx => {
+chat.use(async (ctx,next) => {
+    await changeState(ctx, States.start)
+    await next()
+}).use(async ctx => {
     logger.verbose('User in dead end', { update: ctx.update } )
     const message = await ctx.reply('Воспользуйтесь /start', {
         reply_markup: new InlineKeyboard().row(supportInlineButton)
     })
-    await userDidStarted(ctx.from!.id, message.message_id)
+    await setMainMessage(ctx,message)
 })
 export default chat

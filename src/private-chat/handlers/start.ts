@@ -1,22 +1,19 @@
 import { Composer, InlineKeyboard } from "grammy";
-import { Roles } from "../../app";
-import { userDidStarted } from "../private-chat-controller";
-import { logger } from "../utils";
-import { supportInlineButton } from "../utils";
+import { Roles } from "../private-chat-controller";
+import { replyWithChatAction, setMainMessage, supportInlineButton } from "../utils";
+import { changeState, States } from "./routers/main-router";
 
 const chat = new Composer()
-
 chat.command('start', async ctx => {
-    logger.debug('Start command')
-    await ctx.replyWithChatAction('typing')
+    await replyWithChatAction(ctx,'typing')
     const message = await ctx.reply('Выберите роль:', {
         reply_markup: new InlineKeyboard()
-        .text('Пассажир', Roles.PASSANGER)
-        .text('Водитель', Roles.DRIVER)
+        .text('Пассажир', Roles.Passanger)
+        .text('Водитель', Roles.Driver)
         .row(supportInlineButton)
     })
-    await userDidStarted(ctx.from!.id, message.message_id)
+    await setMainMessage(ctx, message)
+    await changeState(ctx, States.roleSelect)
 })
-
 
 export default chat
