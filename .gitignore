@@ -1,3 +1,6 @@
+#vscode project settings
+.vscode
+
 # Logs
 logs
 *.log
