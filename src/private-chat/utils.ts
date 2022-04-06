@@ -39,6 +39,19 @@ export async function setMainMessage(
     await saveMainMessage(ctx.from!.id, message.message_id)
 }
 
+export async function deleteMainMessage(ctx: Context) {
+    const mainMessageId = await getMainMessage(ctx.from!.id)
+    if (!mainMessageId) {
+        return
+    }
+    try {
+        await ctx.api.deleteMessage(ctx.chat!.id, mainMessageId)
+    } catch(error) {
+        //No-action because message probably old
+        logger.verbose('Could not delete main message')
+    }
+}
+
 export async function isMainMessage(ctx:Context):Promise<boolean> {
     if (ctx.callbackQuery?.message) {
         if (ctx.callbackQuery.message.message_id === await getMainMessage(ctx.from!.id)) {

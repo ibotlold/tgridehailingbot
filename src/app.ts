@@ -23,7 +23,9 @@ connectToDatabase()
     bot.filter((ctx) => ctx.chat?.type === 'private').use(privateChat)
     bot.filter((ctx) => ctx.chat?.type !== 'private').use(publicChat)
     logger.verbose('Bot starting...')
-    bot.start()
+    bot.start({
+        drop_pending_updates: true
+    })
     logger.info('Bot started')
     bot.catch((error) => {
         if (error instanceof BotError) {

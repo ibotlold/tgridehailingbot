@@ -1,5 +1,5 @@
 import { Composer, InlineKeyboard } from "grammy";
-import { logger, setMainMessage } from "../utils";
+import { deleteMainMessage, logger, setMainMessage } from "../utils";
 import { supportInlineButton } from "../utils";
 import { changeState, States } from "./routers/main-router";
 
@@ -23,6 +23,8 @@ chat.use(async (ctx,next) => {
     const message = await ctx.reply('Воспользуйтесь /start', {
         reply_markup: new InlineKeyboard().row(supportInlineButton)
     })
+    await ctx.deleteMessage()
+    await deleteMainMessage(ctx)
     await setMainMessage(ctx,message)
 })
 export default chat
