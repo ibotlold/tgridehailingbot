@@ -4,7 +4,6 @@ import { isMainMessage, logger } from "../../utils";
 
 export enum States {
   start = 'start',
-  roleSelect = 'roleSelect',
   passanger = 'passanger',
   driver = 'driver',
   request = 'request',

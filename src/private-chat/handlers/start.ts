@@ -13,7 +13,16 @@ chat.command('start', async ctx => {
         .row(supportInlineButton)
     })
     await setMainMessage(ctx, message)
-    await changeState(ctx, States.roleSelect)
+    await changeState(ctx, States.start)
 })
+chat.callbackQuery(Roles.Passanger, async(ctx,next) => {
+    await changeState(ctx, States.passanger)
+    await next()
+})
+chat.callbackQuery(Roles.Driver, async (ctx,next) => {
+    await changeState(ctx, States.driver)
+    await next()
+})
+
 
 export default chat
