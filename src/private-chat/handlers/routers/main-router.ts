@@ -1,3 +1,4 @@
+import { Router } from "@grammyjs/router";
 import { Context } from "grammy";
 import { getUserState, setUserState } from "../../private-chat-controller";
 import { isMainMessage, logger } from "../../utils";
@@ -10,7 +11,15 @@ export enum States {
   registration = 'registration'
 }
 
-export default async function mainRouter(
+export const stateRouter = new Router(mainRouter)
+
+import start from '../start'
+import passanger from '../passanger'
+
+stateRouter.route(States.start, start)
+stateRouter.route(States.passanger, passanger)
+
+async function mainRouter(
   ctx: Context
   ):Promise<string | undefined> {
     const userState = await getUserState(ctx.from!.id)

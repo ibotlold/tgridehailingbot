@@ -1,7 +1,7 @@
 import { Composer, InlineKeyboard } from "grammy";
 import { Roles } from "../private-chat-controller";
 import { deleteMainMessage, replyWithChatAction, setMainMessage, supportInlineButton } from "../utils";
-import { changeState, States } from "./routers/main-router";
+import { changeState, stateRouter, States } from "./routers/main-router";
 
 const chat = new Composer()
 chat.command('start', async ctx => {
@@ -21,11 +21,10 @@ chat.command('start', async ctx => {
 chat.callbackQuery(Roles.Passanger, async(ctx,next) => {
     await changeState(ctx, States.passanger)
     await next()
-})
+}).use(stateRouter)
 chat.callbackQuery(Roles.Driver, async (ctx,next) => {
     await changeState(ctx, States.driver)
     await next()
-})
-
+}).use(stateRouter)
 
 export default chat
