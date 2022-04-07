@@ -1,10 +1,19 @@
 import { collections } from "../database";
 import { logger } from "../logger";
+import mongoUserDAO from "../mongo/user-dao-impl";
 import { States } from "./handlers/routers/main-router";
 
 export enum Roles {
     Passanger = 'passanger',
     Driver = 'driver'
+}
+
+export const dao:{
+    userDAO?: mongoUserDAO
+} = {}
+
+export async function ChatControllerInit() {
+    dao.userDAO = new mongoUserDAO(collections.users!)
 }
 
 export async function userDidChangedStatus(userId:number, newStatus: string):Promise<void> {
