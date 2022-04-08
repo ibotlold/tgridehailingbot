@@ -1,6 +1,5 @@
 import { Context, NextFunction } from "grammy";
-import User from "../../../dao/user/user";
-import { dao } from "../../private-chat-controller";
+import { userDidChangedStatus } from "../../private-chat-controller";
 import { logger } from "../../utils";
 
 export default async function user(
@@ -14,11 +13,8 @@ export default async function user(
             status: newStatus
         }
     })
-    const user = new User(ctx.from!.id, newStatus)
-    const userFromDB = await dao.userDAO?.findUserById(user.userId)
-    if (userFromDB) {
-        await dao.userDAO?.updateUser(userFromDB, user)
-        return
-    }
-    dao.userDAO?.insertUser(user)
-}
+    await userDidChangedStatus(
+        ctx.from!.id,
+        ctx.update.my_chat_member!.new_chat_member.status
+    )
+} 
