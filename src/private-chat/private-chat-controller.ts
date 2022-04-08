@@ -18,7 +18,8 @@ export async function ChatControllerInit() {
 }
 //#endregion
 
-export async function userDidChangeStatus(userId:number, newStatus: string):Promise<void> {
+export async function userDidChangeStatus(userId:number, newStatus: string)
+:Promise<void> {
     const user = new User(userId, newStatus)
     const userFromDB = await dao.userDAO?.findUserById(user.userId)
     if (userFromDB) {
@@ -30,20 +31,23 @@ export async function userDidChangeStatus(userId:number, newStatus: string):Prom
     dao.userDAO?.insertUser(user)
 }
 
-export async function setMainMessage(userId:number, messageId: number):Promise<void> {
+export async function setMainMessage(userId:number, messageId: number)
+:Promise<void> {
     const user = await dao.userDAO?.findUserById(userId)
     if (!user) throw new Error('User does not exist')
     logger.debug('Update user main message')
     dao.userDAO?.updateUser(user, { mainMessage: messageId })
 }
 
-export async function getMainMessage(userId:number) {
+export async function getMainMessage(userId:number)
+:Promise<number | undefined> {
     const user = await dao.userDAO?.findUserById(userId)
     if (!user) throw new Error('User does not exist')
     return user?.mainMessage
 }
 
-export async function getUserState(userId:number):Promise<States | undefined> {
+export async function getUserState(userId:number)
+:Promise<States | undefined> {
     const user = await collections.users!.findOne({
         userId: userId
     })
@@ -51,7 +55,8 @@ export async function getUserState(userId:number):Promise<States | undefined> {
     return user!.state
 }
 
-export async function setUserState(userId:number, state: States):Promise<void> {
+export async function setUserState(userId:number, state: States)
+:Promise<void> {
     const user = await collections.users!.findOne({
         userId: userId
     })
