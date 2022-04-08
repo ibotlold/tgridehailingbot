@@ -1,7 +1,8 @@
-import mongoDAO from "./abstract-dao-impl";
+import mongoDAO from "./abstract-dao";
 import UserDAO from "../dao/user/user-dao";
 import User from "../dao/user/user";
 import UserEntity from "../dao/user/user-entity";
+import { logger } from "../logger";
 
 export default class mongoUserDAO 
 extends mongoDAO<UserEntity> implements UserDAO {
@@ -24,11 +25,16 @@ extends mongoDAO<UserEntity> implements UserDAO {
     return user
   }
   async  updateUser(user: User, updates: Partial<User>):Promise<void> {
-    await this._collection.findOneAndUpdate({
+    const result = await this._collection.findOneAndUpdate({
       userId: user.userId
     }, {
-        $set: user
+        $set: {
+          status: updates.status,
+          mainMessage: user.mainMessage,
+          state: user.state
+        }
       }
     )
+    logger.debug('Update user', result)
   }
 }

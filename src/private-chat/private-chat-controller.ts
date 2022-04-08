@@ -1,6 +1,6 @@
 import { collections } from "../database";
 import { logger } from "../logger";
-import mongoUserDAO from "../mongo/user-dao-impl";
+import mongoUserDAO from "../mongo/user-dao";
 import { States } from "./handlers/routers/main-router";
 
 export enum Roles {

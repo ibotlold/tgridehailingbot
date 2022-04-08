@@ -8,7 +8,7 @@ export default class User implements UserEntity {
   status: string
   mainMessage?: number
   state?: States
-  private constructor(userId: number, status: string) {
+  constructor(userId: number, status: string) {
     this.userId = userId
     this.status = status
   }
