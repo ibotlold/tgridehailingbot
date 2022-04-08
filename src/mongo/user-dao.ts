@@ -31,11 +31,7 @@ extends mongoDAO<UserEntity> implements UserDAO {
     const result = await this._collection.findOneAndUpdate({
       userId: user.userId
     }, {
-        $set: {
-          status: updates.status,
-          mainMessage: user.mainMessage,
-          state: user.state
-        }
+        $set: updates
       }
     )
     logger.debug('User updated', result)
