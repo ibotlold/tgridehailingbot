@@ -1,5 +1,5 @@
 import { Context, NextFunction } from "grammy";
-import { userDidChangedStatus } from "../../private-chat-controller";
+import { userDidChangeStatus } from "../../private-chat-controller";
 import { logger } from "../../utils";
 
 export default async function user(
@@ -13,7 +13,7 @@ export default async function user(
             status: newStatus
         }
     })
-    await userDidChangedStatus(
+    await userDidChangeStatus(
         ctx.from!.id,
         ctx.update.my_chat_member!.new_chat_member.status
     )

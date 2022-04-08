@@ -1,3 +1,4 @@
+import User from "../dao/user/user";
 import { collections } from "../database";
 import { logger } from "../logger";
 import mongoUserDAO from "../mongo/user-dao";
@@ -7,7 +8,7 @@ export enum Roles {
     Passanger = 'passanger',
     Driver = 'driver'
 }
-
+//#region DAO objects
 export const dao:{
     userDAO?: mongoUserDAO
 } = {}
@@ -15,23 +16,18 @@ export const dao:{
 export async function ChatControllerInit() {
     dao.userDAO = new mongoUserDAO(collections.users!)
 }
+//#endregion
 
-export async function userDidChangedStatus(userId:number, newStatus: string):Promise<void> {
-    const userFromDB = await collections.users?.findOne({
-        userId: userId
-    })
-    if (!userFromDB) {
-        await collections.users!.insertOne({
-            userId: userId,
-            status: newStatus
-        })
-        logger.debug('Created new user', { user: { userId: userId, status: newStatus } })
+export async function userDidChangeStatus(userId:number, newStatus: string):Promise<void> {
+    const user = new User(userId, newStatus)
+    const userFromDB = await dao.userDAO?.findUserById(user.userId)
+    if (userFromDB) {
+        logger.debug('Updating user status')
+        await dao.userDAO?.updateUser(userFromDB, user)
         return
     }
-    await collections.users?.updateOne(userFromDB, {
-        $set: { status: newStatus }
-    })
-    logger.debug('Updated user status', { user: userFromDB })
+    logger.debug('Creating new user')
+    dao.userDAO?.insertUser(user)
 }
 
 export async function setMainMessage(userId:number, messageId: number):Promise<void> {

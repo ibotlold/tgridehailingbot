@@ -1,7 +1,7 @@
 import { Context, GrammyError } from "grammy";
 import { InlineKeyboardButton, Message } from "grammy/out/platform.node";
 import { Config } from "../config";
-import { getMainMessage, setMainMessage as saveMainMessage, userDidChangedStatus } from "./private-chat-controller"
+import { getMainMessage, setMainMessage as saveMainMessage, userDidChangeStatus } from "./private-chat-controller"
 
 import { logger as parentLogger } from "../logger";
 export const logger = parentLogger.child({
@@ -26,7 +26,7 @@ export async function replyWithChatAction(
     } catch(error) {
         if (error instanceof GrammyError) {
             if (error.error_code === 403) {
-                await userDidChangedStatus(ctx.from!.id, 'kicked')
+                await userDidChangeStatus(ctx.from!.id, 'kicked')
             } 
         }            
     }
