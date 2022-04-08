@@ -1,6 +1,6 @@
 export default interface DataAccessObject<T> {
-  insertUser(item: T):Promise<void>
-  deleteUser(item: T):Promise<void>
-  findUserById(item: number):Promise<T>
-  updateUser(item: T, updates: Partial<T>):Promise<void>
+  insert(item: T):Promise<void>
+  delete(item: T):Promise<void>
+  finByUserId(item: number):Promise<T>
+  update(item: T, updates: Partial<T>):Promise<void>
 }

@@ -1,7 +1,8 @@
 import { Composer, InlineKeyboard } from "grammy";
+import { States } from "../../dao/user/user-entity";
 import { deleteMainMessage, logger, setMainMessage } from "../utils";
 import { supportInlineButton } from "../utils";
-import { changeState, States } from "./routers/main-router";
+import { changeState } from "./routers/main-router";
 
 const chat = new Composer()
 chat.on('callback_query', async ctx => {

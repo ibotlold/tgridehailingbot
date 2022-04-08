@@ -16,7 +16,7 @@ stateRouter.route(States.passanger, passanger)
 async function mainRouter(
   ctx: Context
   ):Promise<string | undefined> {
-    const user = await dao.userDAO?.findUserById(ctx.from!.id)
+    const user = await dao.userDAO?.finByUserId(ctx.from!.id)
     const userState = user!.state
     logger.verbose('User state', { user: {
       userId: ctx.from!.id,
@@ -27,7 +27,7 @@ async function mainRouter(
     }
     //Set default state
     if (!userState) {
-      dao.userDAO?.updateUser(user!, {
+      dao.userDAO?.update(user!, {
         state: States.start
       })
     }
@@ -35,8 +35,8 @@ async function mainRouter(
   }
   
   export async function changeState(ctx: Context, state: States) {
-    const user = await dao.userDAO?.findUserById(ctx.from!.id)
-    await dao.userDAO?.updateUser(user!, {
+    const user = await dao.userDAO?.finByUserId(ctx.from!.id)
+    await dao.userDAO?.update(user!, {
       state: state
     })
   }

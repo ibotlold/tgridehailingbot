@@ -1,7 +1,7 @@
 import User from "../dao/user/user";
 import { collections } from "../database";
 import { logger } from "../logger";
-import mongoUserDAO from "../mongo/user-dao";
+import mongoDAO from "../mongo/dao-impl";
 
 export enum Roles {
     Passanger = 'passanger',
@@ -9,23 +9,23 @@ export enum Roles {
 }
 //#region DAO objects
 export const dao:{
-    userDAO?: mongoUserDAO
+    userDAO?: mongoDAO<User>
 } = {}
 
 export async function ChatControllerInit() {
-    dao.userDAO = new mongoUserDAO(collections.users!)
+    dao.userDAO = new mongoDAO(collections.users!)
 }
 //#endregion
 
 export async function userDidChangeStatus(userId:number, newStatus: string)
 :Promise<void> {
     const user = new User(userId, newStatus)
-    const userFromDB = await dao.userDAO?.findUserById(user.userId)
+    const userFromDB = await dao.userDAO?.finByUserId(user.userId)
     if (userFromDB) {
         logger.debug('Updating user status')
-        await dao.userDAO?.updateUser(userFromDB, user)
+        await dao.userDAO?.update(userFromDB, user)
         return
     }
     logger.debug('Creating new user')
-    dao.userDAO?.insertUser(user)
+    dao.userDAO?.insert(user)
 }

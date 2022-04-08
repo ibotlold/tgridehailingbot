@@ -36,15 +36,15 @@ export async function setMainMessage(
     ctx: Context,
     message:Message.TextMessage
     ):Promise<void> {
-    const user = await dao.userDAO?.findUserById(ctx.from!.id)
+    const user = await dao.userDAO?.finByUserId(ctx.from!.id)
     logger.debug('Updating main message')
-    dao.userDAO?.updateUser(user!, {
+    dao.userDAO?.update(user!, {
         mainMessage: message.message_id
     })
 }
 
 export async function deleteMainMessage(ctx: Context) {
-    const user = await dao.userDAO?.findUserById(ctx.from!.id)
+    const user = await dao.userDAO?.finByUserId(ctx.from!.id)
     if (!user!.mainMessage) {
         return
     }
@@ -59,7 +59,7 @@ export async function deleteMainMessage(ctx: Context) {
 export async function isCallbackFromMainMessage(ctx:Context):Promise<boolean> {
     if (!ctx.callbackQuery) throw new Error('')
     if (ctx.callbackQuery.message) {
-        const user = await dao.userDAO?.findUserById(ctx.from!.id)
+        const user = await dao.userDAO?.finByUserId(ctx.from!.id)
         if (ctx.callbackQuery.message.message_id === user?.mainMessage) {
             return true
         }
