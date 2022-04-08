@@ -31,14 +31,10 @@ export async function userDidChangeStatus(userId:number, newStatus: string):Prom
 }
 
 export async function setMainMessage(userId:number, messageId: number):Promise<void> {
-    const user = await collections.users!.findOne({
-        userId: userId
-    })
-    await collections.users!.updateOne(user!, {
-        $set: {
-            mainMessage: messageId
-        }
-    })
+    const user = await dao.userDAO?.findUserById(userId)
+    if (!user) throw new Error('User does not exist')
+    logger.debug('Update user main message')
+    dao.userDAO?.updateUser(user, { mainMessage: messageId })
 }
 
 export async function getMainMessage(userId:number) {
