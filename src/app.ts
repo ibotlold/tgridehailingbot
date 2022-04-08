@@ -5,6 +5,7 @@ import { connectToDatabase } from './database'
 import { logger } from './logger'
 
 import privateChat from './private-chat/private-chat'
+import { ChatControllerInit } from './private-chat/private-chat-controller'
 import publicChat from './public-chat/public-chat'
 
 const BOT_TOKEN = Config.TOKEN()
@@ -18,8 +19,9 @@ export enum Roles {
 
 logger.verbose('Connecting to database...')
 connectToDatabase()
-.then(() => {
+.then(async () => {
     logger.verbose('Connection established')
+    await ChatControllerInit()
     bot.filter((ctx) => ctx.chat?.type === 'private').use(privateChat)
     bot.filter((ctx) => ctx.chat?.type !== 'private').use(publicChat)
     logger.verbose('Bot starting...')

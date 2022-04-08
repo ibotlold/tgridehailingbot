@@ -1,7 +1,7 @@
 import { Context, GrammyError } from "grammy";
 import { InlineKeyboardButton, Message } from "grammy/out/platform.node";
 import { Config } from "../config";
-import { getMainMessage, setMainMessage as saveMainMessage, userDidChangedStatus } from "./private-chat-controller"
+import { dao, userDidChangeStatus } from "./private-chat-controller"
 
 import { logger as parentLogger } from "../logger";
 export const logger = parentLogger.child({
@@ -26,7 +26,7 @@ export async function replyWithChatAction(
     } catch(error) {
         if (error instanceof GrammyError) {
             if (error.error_code === 403) {
-                await userDidChangedStatus(ctx.from!.id, 'kicked')
+                await userDidChangeStatus(ctx.from!.id, 'kicked')
             } 
         }            
     }
@@ -36,28 +36,34 @@ export async function setMainMessage(
     ctx: Context,
     message:Message.TextMessage
     ):Promise<void> {
-    await saveMainMessage(ctx.from!.id, message.message_id)
+    const user = await dao.userDAO?.findUserById(ctx.from!.id)
+    logger.debug('Updating main message')
+    dao.userDAO?.updateUser(user!, {
+        mainMessage: message.message_id
+    })
 }
 
 export async function deleteMainMessage(ctx: Context) {
-    const mainMessageId = await getMainMessage(ctx.from!.id)
-    if (!mainMessageId) {
+    const user = await dao.userDAO?.findUserById(ctx.from!.id)
+    if (!user!.mainMessage) {
         return
     }
     try {
-        await ctx.api.deleteMessage(ctx.chat!.id, mainMessageId)
+        await ctx.api.deleteMessage(user!.userId, user!.mainMessage)
     } catch(error) {
         //No-action because message probably old
         logger.verbose('Could not delete main message')
     }
 }
 
-export async function isMainMessage(ctx:Context):Promise<boolean> {
-    if (ctx.callbackQuery?.message) {
-        if (ctx.callbackQuery.message.message_id === await getMainMessage(ctx.from!.id)) {
+export async function isCallbackFromMainMessage(ctx:Context):Promise<boolean> {
+    if (!ctx.callbackQuery) throw new Error('')
+    if (ctx.callbackQuery.message) {
+        const user = await dao.userDAO?.findUserById(ctx.from!.id)
+        if (ctx.callbackQuery.message.message_id === user?.mainMessage) {
             return true
         }
         return false
     }
-    return true
+    return false
 }

@@ -1,15 +1,9 @@
 import { Router } from "@grammyjs/router";
 import { Context } from "grammy";
-import { getUserState, setUserState } from "../../private-chat-controller";
-import { isMainMessage, logger } from "../../utils";
+import { dao } from "../../private-chat-controller";
+import { isCallbackFromMainMessage, logger } from "../../utils";
+import { States } from "../../../dao/user/user-entity";
 
-export enum States {
-  start = 'start',
-  passanger = 'passanger',
-  driver = 'driver',
-  request = 'request',
-  registration = 'registration'
-}
 
 export const stateRouter = new Router(mainRouter)
 
@@ -22,21 +16,27 @@ stateRouter.route(States.passanger, passanger)
 async function mainRouter(
   ctx: Context
   ):Promise<string | undefined> {
-    const userState = await getUserState(ctx.from!.id)
+    const user = await dao.userDAO?.findUserById(ctx.from!.id)
+    const userState = user!.state
     logger.verbose('User state', { user: {
       userId: ctx.from!.id,
       state: userState
     }})
-    if (!await isMainMessage(ctx)) {
+    if (!await isCallbackFromMainMessage(ctx)) {
       return undefined
     }
     //Set default state
     if (!userState) {
-      setUserState(ctx.from!.id, States.start)
+      dao.userDAO?.updateUser(user!, {
+        state: States.start
+      })
     }
     return  userState ?? States.start
   }
   
   export async function changeState(ctx: Context, state: States) {
-    await setUserState(ctx.from!.id, state)
+    const user = await dao.userDAO?.findUserById(ctx.from!.id)
+    await dao.userDAO?.updateUser(user!, {
+      state: state
+    })
   }
