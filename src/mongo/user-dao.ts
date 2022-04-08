@@ -1,11 +1,11 @@
 import mongoDAO from "./abstract-dao";
-import UserDAO from "../dao/user/user-dao";
 import User from "../dao/user/user";
 import UserEntity from "../dao/user/user-entity";
 import { logger } from "../logger";
+import DataAccessObject from "../dao/dao";
 
 export default class mongoUserDAO 
-extends mongoDAO<UserEntity> implements UserDAO {
+extends mongoDAO<UserEntity> implements DataAccessObject<User> {
   async insertUser(user: User):Promise<void> {
     await this._collection.insertOne({
       userId: user.userId,

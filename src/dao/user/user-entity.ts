@@ -1,8 +1,12 @@
-import { ObjectId } from "mongodb"
-import { States } from "../../private-chat/handlers/routers/main-router"
+export enum States {
+  start = 'start',
+  passanger = 'passanger',
+  driver = 'driver',
+  request = 'request',
+  registration = 'registration'
+}
 
 export default interface UserEntity {
-  _id?: ObjectId
   userId: number
   status: string
   mainMessage?: number

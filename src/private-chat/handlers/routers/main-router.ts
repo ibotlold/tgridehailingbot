@@ -2,14 +2,8 @@ import { Router } from "@grammyjs/router";
 import { Context } from "grammy";
 import { dao } from "../../private-chat-controller";
 import { isCallbackFromMainMessage, logger } from "../../utils";
+import { States } from "../../../dao/user/user-entity";
 
-export enum States {
-  start = 'start',
-  passanger = 'passanger',
-  driver = 'driver',
-  request = 'request',
-  registration = 'registration'
-}
 
 export const stateRouter = new Router(mainRouter)
 

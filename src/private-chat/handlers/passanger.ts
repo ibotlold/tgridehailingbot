@@ -1,7 +1,8 @@
 import { Composer, InlineKeyboard } from "grammy"
+import { States } from "../../dao/user/user-entity"
 import { Roles } from "../private-chat-controller"
 import { supportInlineButton } from "../utils"
-import { changeState, States } from "./routers/main-router"
+import { changeState } from "./routers/main-router"
 
 const chat = new Composer()
 chat.callbackQuery(Roles.Passanger, async ctx => {
