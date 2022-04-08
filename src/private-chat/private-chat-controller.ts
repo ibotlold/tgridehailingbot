@@ -38,9 +38,8 @@ export async function setMainMessage(userId:number, messageId: number):Promise<v
 }
 
 export async function getMainMessage(userId:number) {
-    const user = await collections.users!.findOne({
-        userId: userId
-    })
+    const user = await dao.userDAO?.findUserById(userId)
+    if (!user) throw new Error('User does not exist')
     return user?.mainMessage
 }
 
