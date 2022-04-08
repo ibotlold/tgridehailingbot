@@ -11,17 +11,20 @@ extends mongoDAO<UserEntity> implements UserDAO {
       userId: user.userId,
       status: user.status
     })
+    logger.debug('New user created')
   }
   async deleteUser(user: User):Promise<void> {
-    this._collection.findOneAndDelete({
+    await this._collection.findOneAndDelete({
       userId: user.userId
     })
+    logger.debug('User deleted')
   }
   async findUserById(userId: number):Promise<User> {
     const user = await this._collection.findOne({
       userId: userId
     })
     if (!user) throw new Error('User does not exist')
+    logger.debug('User found')
     return user
   }
   async  updateUser(user: User, updates: Partial<User>):Promise<void> {
@@ -35,6 +38,6 @@ extends mongoDAO<UserEntity> implements UserDAO {
         }
       }
     )
-    logger.debug('Update user', result)
+    logger.debug('User updated', result)
   }
 }
