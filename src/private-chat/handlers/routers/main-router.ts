@@ -16,6 +16,7 @@ import year from '../year'
 import color from '../color'
 import plate from '../plate'
 import endRegistration from '../endRegistration'
+import startPoint from '../start-point'
 
 
 stateRouter.route(States.start, start)
@@ -27,7 +28,7 @@ stateRouter.route(States.year, year)
 stateRouter.route(States.color, color)
 stateRouter.route(States.plate, plate)
 stateRouter.route(States.endRegistration, endRegistration)
-
+stateRouter.route(States.startPoint, startPoint)
 
 async function mainRouter(ctx: Context):Promise<string | undefined> {
   const user = await collections.users!.finByUserId(ctx.from!.id)

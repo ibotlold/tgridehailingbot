@@ -8,7 +8,8 @@ export enum States {
   year = 'year',
   color = 'color',
   plate = 'plate',
-  endRegistration = 'endRegistration'
+  endRegistration = 'endRegistration',
+  startPoint = 'startPoint'
 }
 
 export default interface UserEntity {
