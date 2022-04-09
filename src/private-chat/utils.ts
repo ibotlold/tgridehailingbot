@@ -9,6 +9,7 @@ import { getDriver,
 import { logger as parentLogger } from "../logger";
 import { collections } from "../database";
 import { States } from "../dao/user/user-entity"
+
 export const logger = parentLogger.child({
   chatType: 'private'
 })
@@ -16,6 +17,11 @@ export const logger = parentLogger.child({
 export const supportInlineButton:InlineKeyboardButton = {
   text: 'Поддержка',
   url: Config.SUPPORT_URL()
+}
+
+export const cancelRequest:InlineKeyboardButton = {
+    text: 'Отмена',
+    callback_data: States.passanger
 }
 
 type ChatAction = "typing" | "upload_photo" | "record_video" | "upload_video" | "record_voice" | "upload_voice" | "upload_document" | "find_location" | "record_video_note" | "upload_video_note"
