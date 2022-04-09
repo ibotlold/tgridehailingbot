@@ -19,10 +19,7 @@ export const supportInlineButton:InlineKeyboardButton = {
   url: Config.SUPPORT_URL()
 }
 
-export const cancelRequest:InlineKeyboardButton = {
-    text: 'Отмена',
-    callback_data: States.passanger
-}
+export const cancelRequestMarkup = new InlineKeyboard().text('Отмена', States.passanger)
 
 type ChatAction = "typing" | "upload_photo" | "record_video" | "upload_video" | "record_voice" | "upload_voice" | "upload_document" | "find_location" | "record_video_note" | "upload_video_note"
 /**
