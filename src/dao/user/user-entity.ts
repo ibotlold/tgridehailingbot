@@ -9,7 +9,8 @@ export enum States {
   color = 'color',
   plate = 'plate',
   endRegistration = 'endRegistration',
-  startPoint = 'startPoint'
+  startPoint = 'startPoint',
+  cancelRequest = 'cancelRequest'
 }
 
 export default interface UserEntity {
