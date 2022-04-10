@@ -19,14 +19,14 @@ implements DataAccessObject<T> {
     await this._collection.findOneAndDelete({
       userId: item.userId
     })
-    logger.debug('User deleted')
+    logger.debug('Document deleted')
   }
   async finByUserId(userId: number):Promise<T> {
     const item = await this._collection.findOne({
       userId: userId
     })
-    if (!item) throw new Error('User does not exist')
-    logger.debug('User found')
+    if (!item) throw new Error('Document does not exist')
+    logger.debug('Document found')
     return item
   }
   async  update(item: T, updates: Partial<T>):Promise<void> {
@@ -36,6 +36,6 @@ implements DataAccessObject<T> {
         $set: updates
       }
     )
-    logger.debug('User updated', result)
+    logger.debug('Document updated', result)
   }
 }
