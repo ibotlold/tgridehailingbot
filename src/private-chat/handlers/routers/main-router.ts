@@ -13,30 +13,28 @@ import passanger from '../passanger'
 stateRouter.route(States.start, start)
 stateRouter.route(States.passanger, passanger)
 
-async function mainRouter(
-  ctx: Context
-  ):Promise<string | undefined> {
-    const user = await collections.users!.finByUserId(ctx.from!.id)
-    const userState = user!.state
-    logger.verbose('User state', { user: {
-      userId: ctx.from!.id,
-      state: userState
-    }})
-    if (!await isCallbackFromMainMessage(ctx)) {
-      return undefined
-    }
-    //Set default state
-    if (!userState) {
-      await collections.users!.update(user!, {
-        state: States.start
-      })
-    }
-    return  userState ?? States.start
+async function mainRouter(ctx: Context):Promise<string | undefined> {
+  const user = await collections.users!.finByUserId(ctx.from!.id)
+  const userState = user!.state
+  logger.verbose('User state', { user: {
+    userId: ctx.from!.id,
+    state: userState
+  }})
+  if (!await isCallbackFromMainMessage(ctx)) {
+    return undefined
   }
-  
-  export async function changeState(ctx: Context, state: States) {
-    const user = await collections.users!.finByUserId(ctx.from!.id)
+  //Set default state
+  if (!userState) {
     await collections.users!.update(user!, {
-      state: state
+      state: States.start
     })
   }
+  return  userState ?? States.start
+}
+
+export async function changeState(ctx: Context, state: States) {
+  const user = await collections.users!.finByUserId(ctx.from!.id)
+  await collections.users!.update(user!, {
+    state: state
+  })
+}

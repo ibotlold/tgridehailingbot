@@ -2,7 +2,7 @@ import { Composer } from "grammy";
 
 const chat = new Composer()
 chat.on('message:text', async (ctx) => {
-    //todo
+  //todo
 })
 
 export default chat
