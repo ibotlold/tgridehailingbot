@@ -1,9 +1,10 @@
 import { Context, GrammyError } from "grammy";
 import { InlineKeyboardButton, Message } from "grammy/out/platform.node";
 import { Config } from "../config";
-import { dao, userDidChangeStatus } from "./private-chat-controller"
+import { userDidChangeStatus } from "./private-chat-controller"
 
 import { logger as parentLogger } from "../logger";
+import { collections } from "../database";
 export const logger = parentLogger.child({
     chatType: 'private'
 })
@@ -36,15 +37,15 @@ export async function setMainMessage(
     ctx: Context,
     message:Message.TextMessage
     ):Promise<void> {
-    const user = await dao.userDAO?.finByUserId(ctx.from!.id)
+    const user = await collections.users!.finByUserId(ctx.from!.id)
     logger.debug('Updating main message')
-    dao.userDAO?.update(user!, {
+    await collections.users!.update(user!, {
         mainMessage: message.message_id
     })
 }
 
 export async function deleteMainMessage(ctx: Context) {
-    const user = await dao.userDAO?.finByUserId(ctx.from!.id)
+    const user = await collections.users!.finByUserId(ctx.from!.id)
     if (!user!.mainMessage) {
         return
     }
@@ -59,7 +60,7 @@ export async function deleteMainMessage(ctx: Context) {
 export async function isCallbackFromMainMessage(ctx:Context):Promise<boolean> {
     if (!ctx.callbackQuery) throw new Error('')
     if (ctx.callbackQuery.message) {
-        const user = await dao.userDAO?.finByUserId(ctx.from!.id)
+        const user = await collections.users!.finByUserId(ctx.from!.id)
         if (ctx.callbackQuery.message.message_id === user?.mainMessage) {
             return true
         }

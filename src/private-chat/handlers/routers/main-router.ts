@@ -1,8 +1,8 @@
 import { Router } from "@grammyjs/router";
 import { Context } from "grammy";
-import { dao } from "../../private-chat-controller";
 import { isCallbackFromMainMessage, logger } from "../../utils";
 import { States } from "../../../dao/user/user-entity";
+import { collections } from "../../../database";
 
 
 export const stateRouter = new Router(mainRouter)
@@ -16,7 +16,7 @@ stateRouter.route(States.passanger, passanger)
 async function mainRouter(
   ctx: Context
   ):Promise<string | undefined> {
-    const user = await dao.userDAO?.finByUserId(ctx.from!.id)
+    const user = await collections.users!.finByUserId(ctx.from!.id)
     const userState = user!.state
     logger.verbose('User state', { user: {
       userId: ctx.from!.id,
@@ -27,7 +27,7 @@ async function mainRouter(
     }
     //Set default state
     if (!userState) {
-      dao.userDAO?.update(user!, {
+      await collections.users!.update(user!, {
         state: States.start
       })
     }
@@ -35,8 +35,8 @@ async function mainRouter(
   }
   
   export async function changeState(ctx: Context, state: States) {
-    const user = await dao.userDAO?.finByUserId(ctx.from!.id)
-    await dao.userDAO?.update(user!, {
+    const user = await collections.users!.finByUserId(ctx.from!.id)
+    await collections.users!.update(user!, {
       state: state
     })
   }
