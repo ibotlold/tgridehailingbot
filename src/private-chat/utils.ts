@@ -58,13 +58,12 @@ export async function deleteMainMessage(ctx: Context) {
 }
 
 export async function isCallbackFromMainMessage(ctx:Context):Promise<boolean> {
-  if (!ctx.callbackQuery) throw new Error('')
-  if (ctx.callbackQuery.message) {
+  if (ctx.callbackQuery?.message) {
     const user = await collections.users!.finByUserId(ctx.from!.id)
     if (ctx.callbackQuery.message.message_id === user?.mainMessage) {
       return true
     }
     return false
   }
-  return false
+  return true
 }
