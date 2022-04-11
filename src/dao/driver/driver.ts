@@ -1,10 +1,13 @@
 import DriverEntity from "./driver-entity";
 
 export default class Driver implements DriverEntity {
-  userId: number
-  vehicle: string
-  constructor(userId: number, vehicle: string) {
-    this.userId = userId
-    this.vehicle = vehicle
+  constructor(
+    public userId: number,
+    public brand: string,
+    public model: string,
+    public year: string,
+    public color: string,
+    public plate: string
+    ) {
   }
 }

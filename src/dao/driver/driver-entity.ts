@@ -1,4 +1,8 @@
 export default interface DriverEntity {
   userId: number
-  vehicle: string
+  brand: string
+  model: string
+  year: string
+  color: string
+  plate: string
 }
