@@ -1,7 +1,7 @@
+import Driver from "../dao/driver/driver"
 import User from "../dao/user/user";
 import { collections } from "../database";
 import { logger } from "../logger";
-import mongoDAO from "../mongo/dao-impl";
 
 export enum Roles {
   Passanger = 'passanger',
@@ -19,4 +19,21 @@ export async function userDidChangeStatus(userId:number, newStatus: string)
   }
   logger.debug('Creating new user')
   await collections.users!.insert(user)
+}
+
+export async function getDriver(userId:number):Promise<Driver> {
+  const driver = await collections.drivers!.finByUserId(userId)
+  if (!driver) {
+    throw new Error('Driver does not exist')
+  }
+  return driver
+}
+
+export async function deleteDriver(userId:number) {
+  const driver = new Driver(userId)
+  await collections.drivers?.delete(driver)
+}
+
+export async function saveDriver(driver:Driver) {
+  await collections.drivers?.insert(driver)
 }

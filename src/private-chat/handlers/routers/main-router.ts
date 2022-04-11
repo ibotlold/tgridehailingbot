@@ -9,9 +9,14 @@ export const stateRouter = new Router(mainRouter)
 
 import start from '../start'
 import passanger from '../passanger'
+import driver from '../driver'
+import registration from '../registration'
+
 
 stateRouter.route(States.start, start)
 stateRouter.route(States.passanger, passanger)
+stateRouter.route(States.driver, driver)
+stateRouter.route(States.registration, registration)
 
 async function mainRouter(ctx: Context):Promise<string | undefined> {
   const user = await collections.users!.finByUserId(ctx.from!.id)
