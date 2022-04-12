@@ -37,3 +37,8 @@ export async function deleteDriver(userId:number) {
 export async function saveDriver(driver:Driver) {
   await collections.drivers?.insert(driver)
 }
+
+export async function getMainMessageId(userId: number):Promise<number> {
+  const user = await collections.users?.finByUserId(userId)
+  return user!.mainMessage!
+}

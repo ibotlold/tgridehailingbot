@@ -3,7 +3,8 @@ import { InlineKeyboardButton, Message } from "grammy/out/platform.node";
 import { Config } from "../config";
 import { getDriver,
   userDidChangeStatus,
-  deleteDriver as controllerDeleteDriver } from "./private-chat-controller"
+  deleteDriver as controllerDeleteDriver,
+  getMainMessageId as controllerGetMainMessageId } from "./private-chat-controller"
 
 import { logger as parentLogger } from "../logger";
 import { collections } from "../database";
@@ -87,4 +88,8 @@ export function cancelKeyboard(returnsTo:States):InlineKeyboard {
 
 export async function deleteDriver(ctx: Context) {
   await controllerDeleteDriver(ctx.from!.id)
+}
+
+export async function getMainMessageId(ctx: Context):Promise<number> {
+  return await controllerGetMainMessageId(ctx.from!.id)
 }
