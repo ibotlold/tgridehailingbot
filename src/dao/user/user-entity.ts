@@ -3,7 +3,12 @@ export enum States {
   passanger = 'passanger',
   driver = 'driver',
   request = 'request',
-  registration = 'registration'
+  registration = 'registration',
+  model = 'model',
+  year = 'year',
+  color = 'color',
+  plate = 'plate',
+  endRegistration = 'endRegistration'
 }
 
 export default interface UserEntity {

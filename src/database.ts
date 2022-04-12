@@ -6,7 +6,7 @@ import mongoDAO from './mongo/dao-impl';
 
 export const collections: {
   users?: mongoDAO<UserEntity>
-  drivers?: mongoDB.Collection<DriverEntity>
+  drivers?: mongoDAO<DriverEntity>
 } = {}
 
 export async function connectToDatabase() {
@@ -16,5 +16,5 @@ export async function connectToDatabase() {
   const usersCollection = db.collection<UserEntity>('users')
   collections.users = new mongoDAO(usersCollection)
   const driversCollection = db.collection<DriverEntity>('drivers')
-  collections.drivers = driversCollection
+  collections.drivers = new mongoDAO(driversCollection)
 }

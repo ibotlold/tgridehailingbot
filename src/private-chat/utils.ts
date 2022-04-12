@@ -1,10 +1,14 @@
-import { Context, GrammyError } from "grammy";
+import { Context, GrammyError, InlineKeyboard } from "grammy";
 import { InlineKeyboardButton, Message } from "grammy/out/platform.node";
 import { Config } from "../config";
-import { userDidChangeStatus } from "./private-chat-controller"
+import { getDriver,
+  userDidChangeStatus,
+  deleteDriver as controllerDeleteDriver,
+  getMainMessageId as controllerGetMainMessageId } from "./private-chat-controller"
 
 import { logger as parentLogger } from "../logger";
 import { collections } from "../database";
+import { States } from "../dao/user/user-entity"
 export const logger = parentLogger.child({
   chatType: 'private'
 })
@@ -66,4 +70,26 @@ export async function isCallbackFromMainMessage(ctx:Context):Promise<boolean> {
     return false
   }
   return true
+}
+
+export async function isUserRegisteredAsDriver(ctx:Context):Promise<boolean> {
+  try {
+    await getDriver(ctx.from!.id)
+  } catch(error) {
+    //Throws error if driver is not found in database
+    return false
+  }
+  return true
+}
+
+export function cancelKeyboard(returnsTo:States):InlineKeyboard {
+  return new InlineKeyboard().text('Отмена', returnsTo)
+}
+
+export async function deleteDriver(ctx: Context) {
+  await controllerDeleteDriver(ctx.from!.id)
+}
+
+export async function getMainMessageId(ctx: Context):Promise<number> {
+  return await controllerGetMainMessageId(ctx.from!.id)
 }

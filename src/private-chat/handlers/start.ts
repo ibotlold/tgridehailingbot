@@ -1,24 +1,12 @@
-import { Composer, InlineKeyboard } from "grammy";
+import { Composer } from "grammy";
 import { States } from "../../dao/user/user-entity";
 import { Roles } from "../private-chat-controller";
-import { deleteMainMessage, replyWithChatAction, setMainMessage, supportInlineButton } from "../utils";
+import start from './middlewares/start'
 import { changeState, stateRouter } from "./routers/main-router";
 
 const chat = new Composer()
-chat.command('start', async ctx => {
-  await replyWithChatAction(ctx,'typing')
-  const promiseDeleteMainMessage = deleteMainMessage(ctx)
-  const message = await ctx.reply('Выберите роль:', {
-    reply_markup: new InlineKeyboard()
-    .text('Пассажир', Roles.Passanger)
-    .text('Водитель', Roles.Driver)
-    .row(supportInlineButton)
-  })
-  const promiseDeleteMessage = ctx.deleteMessage()
-  await Promise.all([promiseDeleteMainMessage, promiseDeleteMessage])
-  await setMainMessage(ctx, message)
-  await changeState(ctx, States.start)
-})
+chat.command('start', start)
+chat.callbackQuery(States.start, start)
 
 chat.callbackQuery(Roles.Passanger, async(ctx,next) => {
   await changeState(ctx, States.passanger)
