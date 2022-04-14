@@ -10,7 +10,7 @@ export enum States {
   plate = 'plate',
   endRegistration = 'endRegistration',
   startPoint = 'startPoint',
-  cancelRequest = 'cancelRequest'
+  endPoint = 'endPoint'
 }
 
 export default interface UserEntity {
