@@ -1,12 +1,12 @@
 import { Composer } from "grammy"
 import { States } from "../../dao/user/user-entity"
-import { cancelRequestMarkup } from "../utils"
+import { cancelKeyboard } from "../utils"
 import { changeState, stateRouter } from "./routers/main-router"
 
 const chat = new Composer()
 chat.callbackQuery(States.startPoint, async (ctx) => {
   await ctx.editMessageText('Откуда вас забрать?', {
-    reply_markup: cancelRequestMarkup
+    reply_markup: cancelKeyboard(States.passanger)
   })
 })
 
