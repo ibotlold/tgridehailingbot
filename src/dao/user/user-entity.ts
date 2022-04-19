@@ -10,7 +10,8 @@ export enum States {
   plate = 'plate',
   endRegistration = 'endRegistration',
   startPoint = 'startPoint',
-  endPoint = 'endPoint'
+  endPoint = 'endPoint',
+  note = 'note'
 }
 
 export default interface UserEntity {
