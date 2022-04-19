@@ -8,7 +8,19 @@ import { collections } from "../../../database";
 export const stateRouter = new Router(mainRouter)
 
 import start from '../start'
+
+stateRouter.route(States.start, start)
+//#region Passanger routes
 import passanger from '../passanger'
+import startPoint from '../start-point'
+import endPoint from '../end-point'
+
+stateRouter.route(States.passanger, passanger)
+stateRouter.route(States.startPoint, startPoint)
+stateRouter.route(States.endPoint, endPoint)
+//#endregion
+
+//#region Driver routes
 import driver from '../driver'
 import registration from '../registration'
 import model from '../model'
@@ -16,12 +28,7 @@ import year from '../year'
 import color from '../color'
 import plate from '../plate'
 import endRegistration from '../endRegistration'
-import startPoint from '../start-point'
-import endPoint from '../end-point'
 
-
-stateRouter.route(States.start, start)
-stateRouter.route(States.passanger, passanger)
 stateRouter.route(States.driver, driver)
 stateRouter.route(States.registration, registration)
 stateRouter.route(States.model, model)
@@ -29,8 +36,7 @@ stateRouter.route(States.year, year)
 stateRouter.route(States.color, color)
 stateRouter.route(States.plate, plate)
 stateRouter.route(States.endRegistration, endRegistration)
-stateRouter.route(States.startPoint, startPoint)
-stateRouter.route(States.endPoint, endPoint)
+//#endregion
 
 async function mainRouter(ctx: Context):Promise<string | undefined> {
   const user = await collections.users!.finByUserId(ctx.from!.id)
